@@ -1,0 +1,22 @@
+Display Class - The core graphical class of Slick
+
+	create()
+		Creates a new window. In order to set size parameters, setDisplayMode
+		must be called, first.
+		Ex: Display.create();
+		
+	setDisplayMode(DisplayMode)
+		Sets the display mode for a new window. It accepts a DisplayMode object
+		as an argument.
+		Ex: Display.setDisplayMode(new DisplayMode(<width>, <height>);
+		
+	update()
+		Updates the screen to what has been drawn. Slick automatically uses
+		double buffering, so everything drawn before update() is drawn in the
+		non-active buffer. This method switches the buffers.
+		Ex: Display.update();
+		
+	destroy()
+		Closes the window made by create() and frees the resources it was
+		using.
+		Ex: Display.destroy();

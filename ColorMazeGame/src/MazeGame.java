@@ -1,4 +1,7 @@
 import java.util.*;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 
 public class MazeGame {
 
@@ -18,6 +21,29 @@ public class MazeGame {
 		System.out.println("I HAVE NO IDEA WHAT I'M DOING.");
 		map = makeMaze();
 		printMaze(map);
+		
+		begin();
+	}
+	
+	private static void begin() {
+		try {
+			Display.setDisplayMode(new DisplayMode(600,600));
+			Display.create();
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		// Init OpenGL
+		
+		while(Display.isCloseRequested()) {
+			
+			// Rendering
+			
+			Display.update();
+		}
+		
+		Display.destroy();
 	}
 
 	private static int[][] makeMaze() {
