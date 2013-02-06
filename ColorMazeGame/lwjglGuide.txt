@@ -32,12 +32,15 @@ Mouse Class - Gives information on the mouse
 		Returns an integer y value of the mouse within the window.
 		Ex: int mY = Mouse.getY();
 		
-	bool isButtonDown(int button)
+	boolean isButtonDown(int button)
 		Returns a true/false value for the given mouse button, represented by
 		the "button" integer. Left button = 0, right button = 1.
-		Ex: bool leftDown = Mouse.isButtonDown(0);
+		Ex: boolean leftDown = Mouse.isButtonDown(0);
 		
 Keyboard Class - Gives information on the keyboard
 
-	bool isKeyDown(int key)
+	boolean isKeyDown(int key)
+		Returns a true/false value for the given keyboard key, represented by
+		the "key" integer. Values are Keyboard.KEY_<value>.
+		Ex: boolean rightKeyDown = Keyboard.isKeyDown(Keyboard.KEY_RIGHT);
 	

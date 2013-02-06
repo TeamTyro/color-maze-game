@@ -74,9 +74,10 @@ public class MazeGame {
 	private static void render() {
 		int x, y;
 		
+		// Left
 		x = -300;
 		y = -100;
-		GL11.glColor3f(1, 0, 0);
+		setColor(pX-1, pY);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -84,9 +85,10 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
+		// Right
 		x = 100;
 		y = -100;
-		GL11.glColor3f(1, 0, 0);
+		setColor(pX+1, pY);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -94,9 +96,11 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
+		
+		// Up
 		x = -100;
 		y = 100;
-		GL11.glColor3f(1, 0, 0);
+		setColor(pX, pY-1);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -104,9 +108,10 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
+		// Down
 		x = -100;
 		y = -300;
-		GL11.glColor3f(1, 0, 0);
+		setColor(pX, pY+1);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -114,9 +119,14 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
+		// Player
 		x = -50;
 		y = -50;
-		GL11.glColor3f(1, 1, 1);
+		if(map[pX][pY] == MAP_WIN) {
+			GL11.glColor3f(0,1,0);
+		} else {
+			GL11.glColor3f(1,1,1);
+		}
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+100,y  +0);
@@ -125,31 +135,109 @@ public class MazeGame {
 		GL11.glEnd();
 	}
 	
+	private static void setColor(int x, int y) {
+		if(x<0 || y<0 || x>MAP_WIDTH-1 || y>MAP_HEIGHT-1) {
+			GL11.glColor3f(1,0,0);
+			return;
+		}
+		
+		switch(map[x][y]) {
+		case MAP_BLOCK:
+			GL11.glColor3f(1,0,0);
+			break;
+		case MAP_SPACE:
+			GL11.glColor3f(0,0,1);
+			break;
+		case MAP_WIN:
+			GL11.glColor3f(0,1,0);
+			break;
+		}
+	}
+	
 	private static void checkKeys() {
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[DIR_UP]) {
-			System.out.printf("Up!\n");
+			if(movePlayer(DIR_UP, pX, pY)) {
+				pY--;
+			}
 			keyRefresh[DIR_UP] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
 			keyRefresh[DIR_UP] = true;
 		}
 		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[DIR_DOWN]) {
-			System.out.printf("Down!\n");
+			if(movePlayer(DIR_DOWN, pX, pY)) {
+				pY++;
+			}
 			keyRefresh[DIR_DOWN] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
 			keyRefresh[DIR_DOWN] = true;
 		}
 		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[DIR_LEFT]) {
-			System.out.printf("Left!\n");
+			if(movePlayer(DIR_LEFT, pX, pY)) {
+				pX--;
+			}
 			keyRefresh[DIR_LEFT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
 			keyRefresh[DIR_LEFT] = true;
 		}
 		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[DIR_RIGHT]) {
-			System.out.printf("Right!\n");
+			if(movePlayer(DIR_RIGHT, pX, pY)) {
+				pX++;
+			}
 			keyRefresh[DIR_RIGHT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 			keyRefresh[DIR_RIGHT] = true;
 		}
+	}
+	
+	private static boolean movePlayer(int dir, int x, int y) {
+		switch(dir) {
+		case DIR_UP:
+			if(y>0) {
+				if(map[x][y-1] != MAP_BLOCK) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+			// break;
+		case DIR_DOWN:
+			if(y<MAP_HEIGHT-1) {
+				if(map[x][y+1] != MAP_BLOCK) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+			// break;
+		case DIR_LEFT:
+			if(x>0) {
+				if(map[x-1][y] != MAP_BLOCK) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		case DIR_RIGHT:
+			if(x<MAP_HEIGHT-1) {
+				if(map[x+1][y] != MAP_BLOCK) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		default:
+			System.out.printf("Error: Unexpected direction in movePlayer.\n");
+		}
+		
+		return false;
 	}
 
 	private static int[][] makeMaze() {
@@ -204,7 +292,7 @@ public class MazeGame {
 				}
 				break;
 			default:
-				System.out.printf("OH DAMN! %d\n", dir);
+				System.out.printf("Error: Unexpected random value in map gen.%d\n", dir);
 			}
 			lastDir = dir;
 		}
