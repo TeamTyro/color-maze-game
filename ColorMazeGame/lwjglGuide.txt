@@ -13,10 +13,31 @@ Display Class - The core graphical class of Slick
 	update()
 		Updates the screen to what has been drawn. Slick automatically uses
 		double buffering, so everything drawn before update() is drawn in the
-		non-active buffer. This method switches the buffers.
+		non-active buffer. This method switches the buffers. NOTE: This method
+		automatically updates keyboard and mouse input.
 		Ex: Display.update();
 		
 	destroy()
 		Closes the window made by create() and frees the resources it was
 		using.
 		Ex: Display.destroy();
+		
+Mouse Class - Gives information on the mouse
+
+	int getX()
+		Returns an integer x value of the mouse within the window.
+		Ex: int mX = Mouse.getX();
+		
+	int getY()
+		Returns an integer y value of the mouse within the window.
+		Ex: int mY = Mouse.getY();
+		
+	bool isButtonDown(int button)
+		Returns a true/false value for the given mouse button, represented by
+		the "button" integer. Left button = 0, right button = 1.
+		Ex: bool leftDown = Mouse.isButtonDown(0);
+		
+Keyboard Class - Gives information on the keyboard
+
+	bool isKeyDown(int key)
+	
