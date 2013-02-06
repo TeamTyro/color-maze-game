@@ -1,3 +1,9 @@
+/* MazeGame Class
+ * By Tyler Compton for Team Tyro
+ * 
+ * This is a very simple and minimal map game. It's official name is
+ * "Color Maze Game."
+ */
 import java.util.*;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -7,30 +13,33 @@ import org.lwjgl.opengl.GL11;
 
 public class MazeGame {
 	
+	// Directional constants
 	private static final int DIR_RIGHT = 1;
 	private static final int DIR_LEFT = 2;
 	private static final int DIR_UP = 3;
 	private static final int DIR_DOWN = 4;
-	
+	// Map space constants
 	private static final int MAP_START = 4;
 	private static final int MAP_SPACE = 1;
 	private static final int MAP_BLOCK = 2;
 	private static final int MAP_WIN = 3;
-	
-	private static final int MAP_SIZE = 64;
+	// Map property constants
 	private static final int MAP_WIDTH = 16;
 	private static final int MAP_HEIGHT = 16;
 
 	private static Random generator = new Random();
-	private static int[][] map;
+	private static int[][] map;	// Universal map array
 	
 	private static boolean [] keyRefresh;
 	
-	private static int pX, pY;
+	private static int pX, pY;	// Player x and y (within the map array)
 
-	// main() Whatever, who cares
+	/* Function main(String args[])
+	 * Runs maze creation, sets some variables, and starts
+	 * the main loop.
+	 */
 	public static void main(String args[]) {
-		System.out.println("I HAVE NO IDEA WHAT I'M DOING.");
+		System.out.printf("Cheater's map:\n");
 		map = makeMaze();
 		printMaze(map);
 		
@@ -41,6 +50,9 @@ public class MazeGame {
 		begin();
 	}
 	
+	/* Function begin()
+	 * Sets up OpenGL and lwjgl and contains the main loop.
+	 */
 	private static void begin() {
 		try {
 			Display.setDisplayMode(new DisplayMode(600,600));
@@ -56,13 +68,14 @@ public class MazeGame {
 		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
-		// Start graphical loop
+		// Start main loop
 		while(!Display.isCloseRequested()) {
 			// Clears screen and depth buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
 			
 			// Rendering
 			render();
+			
 			checkKeys();
 			
 			Display.update();
@@ -71,13 +84,16 @@ public class MazeGame {
 		Display.destroy();
 	}
 	
+	/* Function render()
+	 * Draws all visible objects.
+	 */
 	private static void render() {
-		int x, y;
+		int x, y;	// Bottom left corner coordinates (for readability)
 		
-		// Left
+		// Left box
 		x = -300;
 		y = -100;
-		setColor(pX-1, pY);
+		setColor(pX-1, pY, map);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -85,10 +101,10 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
-		// Right
+		// Right box
 		x = 100;
 		y = -100;
-		setColor(pX+1, pY);
+		setColor(pX+1, pY, map);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -97,10 +113,10 @@ public class MazeGame {
 		GL11.glEnd();
 		
 		
-		// Up
+		// Up box
 		x = -100;
 		y = 100;
-		setColor(pX, pY-1);
+		setColor(pX, pY-1, map);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -108,10 +124,10 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
-		// Down
+		// Down box
 		x = -100;
 		y = -300;
-		setColor(pX, pY+1);
+		setColor(pX, pY+1, map);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+200,y  +0);
@@ -135,13 +151,17 @@ public class MazeGame {
 		GL11.glEnd();
 	}
 	
-	private static void setColor(int x, int y) {
+	/* Function setColor(int x, int y, int [][] tmap)
+	 * Returns a fitting color based on what is on the given
+	 * coordinates on the given map.
+	 */
+	private static void setColor(int x, int y, int [][] tmap) {
 		if(x<0 || y<0 || x>MAP_WIDTH-1 || y>MAP_HEIGHT-1) {
 			GL11.glColor3f(1,0,0);
 			return;
 		}
 		
-		switch(map[x][y]) {
+		switch(tmap[x][y]) {
 		case MAP_BLOCK:
 			GL11.glColor3f(1,0,0);
 			break;
@@ -154,33 +174,41 @@ public class MazeGame {
 		}
 	}
 	
+	/* Function checkKeys()
+	 * Reads for key input and acts accordingly. More specifically,
+	 * the player is moved from arrow key presses.
+	 */
 	private static void checkKeys() {
+		// Check for "Up" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[DIR_UP]) {
-			if(movePlayer(DIR_UP, pX, pY)) {
+			if(movePlayer(DIR_UP, pX, pY, map)) {
 				pY--;
 			}
 			keyRefresh[DIR_UP] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
 			keyRefresh[DIR_UP] = true;
 		}
+		// Check for "Down" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[DIR_DOWN]) {
-			if(movePlayer(DIR_DOWN, pX, pY)) {
+			if(movePlayer(DIR_DOWN, pX, pY, map)) {
 				pY++;
 			}
 			keyRefresh[DIR_DOWN] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
 			keyRefresh[DIR_DOWN] = true;
 		}
+		// Check for "Left" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[DIR_LEFT]) {
-			if(movePlayer(DIR_LEFT, pX, pY)) {
+			if(movePlayer(DIR_LEFT, pX, pY, map)) {
 				pX--;
 			}
 			keyRefresh[DIR_LEFT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
 			keyRefresh[DIR_LEFT] = true;
 		}
+		// Check for "Right" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[DIR_RIGHT]) {
-			if(movePlayer(DIR_RIGHT, pX, pY)) {
+			if(movePlayer(DIR_RIGHT, pX, pY, map)) {
 				pX++;
 			}
 			keyRefresh[DIR_RIGHT] = false;
@@ -189,11 +217,15 @@ public class MazeGame {
 		}
 	}
 	
-	private static boolean movePlayer(int dir, int x, int y) {
+	/* Function movePlayer(int dir, int x, int y, int [][] tmap)
+	 * Checks move requests for validity. Returns true if no
+	 * obstructions would keep the player from moving in that direction.
+	 */
+	private static boolean movePlayer(int dir, int x, int y, int [][] tmap) {
 		switch(dir) {
 		case DIR_UP:
 			if(y>0) {
-				if(map[x][y-1] != MAP_BLOCK) {
+				if(tmap[x][y-1] != MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -204,7 +236,7 @@ public class MazeGame {
 			// break;
 		case DIR_DOWN:
 			if(y<MAP_HEIGHT-1) {
-				if(map[x][y+1] != MAP_BLOCK) {
+				if(tmap[x][y+1] != MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -215,7 +247,7 @@ public class MazeGame {
 			// break;
 		case DIR_LEFT:
 			if(x>0) {
-				if(map[x-1][y] != MAP_BLOCK) {
+				if(tmap[x-1][y] != MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -225,7 +257,7 @@ public class MazeGame {
 			}
 		case DIR_RIGHT:
 			if(x<MAP_HEIGHT-1) {
-				if(map[x+1][y] != MAP_BLOCK) {
+				if(tmap[x+1][y] != MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -239,7 +271,12 @@ public class MazeGame {
 		
 		return false;
 	}
-
+	
+	/* Function makeMaze()
+	 * Randomly creates a maze by drawing lines of a random
+	 * direction and size and returns a two dimensional
+	 * array with the map information.
+	 */
 	private static int[][] makeMaze() {
 		int [][] out = new int [MAP_WIDTH][MAP_HEIGHT];
 		for(int x=0; x<MAP_WIDTH; x++) {
@@ -292,7 +329,7 @@ public class MazeGame {
 				}
 				break;
 			default:
-				System.out.printf("Error: Unexpected random value in map gen.%d\n", dir);
+				System.out.printf("Error: Unexpected random value in map gen. %d\n", dir);
 			}
 			lastDir = dir;
 		}
@@ -301,7 +338,10 @@ public class MazeGame {
 		
 		return out;
 	}
-
+	
+	/* Function printMaze(int[][] tmap)
+	 * Prints the given map as text.
+	 */
 	private static void printMaze(int[][] tmap) {
 		for(int x=0; x<MAP_WIDTH+2; x++) {
 			System.out.printf("[-]");
@@ -329,5 +369,7 @@ public class MazeGame {
 		for(int x=0; x<MAP_WIDTH+2; x++) {
 			System.out.printf("[-]");
 		}
+		
+		System.out.printf("\n");
 	}
 }
