@@ -10,6 +10,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import recording.ActionStamp;
 
 public class MazeGame {
 	
@@ -30,6 +31,9 @@ public class MazeGame {
 	private static Random generator = new Random();
 	private static int[][] map;	// Universal map array
 	
+	private static ActionStamp [] recActions;
+	private static int currentAction;
+	
 	private static boolean [] keyRefresh;
 	
 	private static int pX, pY;	// Player x and y (within the map array)
@@ -46,6 +50,10 @@ public class MazeGame {
 		pX = MAP_WIDTH/2;
 		pY = 0;
 		keyRefresh = new boolean [5];
+		
+		recActions = new ActionStamp [500];
+		
+		currentAction = 0;
 		
 		begin();
 	}
@@ -234,6 +242,8 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[DIR_UP]) {
 			if(movePlayer(DIR_UP, pX, pY, map)) {
 				pY--;
+				recActions[currentAction].setAction(DIR_UP);
+				currentAction++;
 			}
 			keyRefresh[DIR_UP] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -243,6 +253,8 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[DIR_DOWN]) {
 			if(movePlayer(DIR_DOWN, pX, pY, map)) {
 				pY++;
+				recActions[currentAction].setAction(DIR_DOWN);
+				currentAction++;
 			}
 			keyRefresh[DIR_DOWN] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
@@ -252,6 +264,8 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[DIR_LEFT]) {
 			if(movePlayer(DIR_LEFT, pX, pY, map)) {
 				pX--;
+				recActions[currentAction].setAction(DIR_LEFT);
+				currentAction++;
 			}
 			keyRefresh[DIR_LEFT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
@@ -261,6 +275,8 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[DIR_RIGHT]) {
 			if(movePlayer(DIR_RIGHT, pX, pY, map)) {
 				pX++;
+				recActions[currentAction].setAction(DIR_RIGHT);
+				currentAction++;
 			}
 			keyRefresh[DIR_RIGHT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
