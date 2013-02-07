@@ -33,6 +33,8 @@ public class MazeGame {
 	
 	private static ActionStamp [] recActions;
 	private static int currentAction;
+	private static int replayAction;
+	private static boolean replay;
 	
 	private static boolean [] keyRefresh;
 	
@@ -49,9 +51,10 @@ public class MazeGame {
 		
 		pX = MAP_WIDTH/2;
 		pY = 0;
-		keyRefresh = new boolean [5];
+		keyRefresh = new boolean [6];
 		
 		recActions = new ActionStamp [500];
+		replay = false;
 		
 		currentAction = 0;
 		
@@ -79,17 +82,33 @@ public class MazeGame {
 		// Start main loop
 		while(!Display.isCloseRequested()) {
 			// Clears screen and depth buffer
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); 
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			
 			// Rendering
 			render();
 			
-			checkKeys();
+			if(replay) {
+				if(replayAction < currentAction) {
+					replayGame(recActions, replayAction);
+					replayAction++;
+				}
+			} else {
+				checkKeys();
+			}
 			
 			Display.update();
 		}
 		
 		Display.destroy();
+	}
+	
+	private static void replayGame(ActionStamp [] s_recActions, int currAction) {
+		movePlayer(s_recActions[currAction].getAction(), pX, pY, map);
+		try {
+		    Thread.sleep(100);
+		} catch(InterruptedException ex) {
+		    Thread.currentThread().interrupt();
+		}
 	}
 	
 	/* Function render()
@@ -281,6 +300,15 @@ public class MazeGame {
 			keyRefresh[DIR_RIGHT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 			keyRefresh[DIR_RIGHT] = true;
+		}
+		// Check for "R" key
+		if(Keyboard.isKeyDown(Keyboard.KEY_R) && keyRefresh[5]) {
+			keyRefresh[5] = false;
+			replay = true;
+			pX = MAP_WIDTH/2;
+			pY = 0;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_R)) {
+			keyRefresh[5] = true;
 		}
 	}
 	
