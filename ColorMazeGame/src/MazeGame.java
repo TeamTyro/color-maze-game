@@ -135,14 +135,65 @@ public class MazeGame {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
+		// Top-Left box
+		x = -300;
+		y = 100;
+		setColor(pX-1, pY-1, map);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex2f(x    ,y    );
+			GL11.glVertex2f(x+200,y  +0);
+			GL11.glVertex2f(x+200,y+200);
+			GL11.glVertex2f(x  +0,y+200);
+		GL11.glEnd();
+		
+		// Top-Right box
+		x = 100;
+		y = 100;
+		setColor(pX+1, pY-1, map);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex2f(x    ,y    );
+			GL11.glVertex2f(x+200,y  +0);
+			GL11.glVertex2f(x+200,y+200);
+			GL11.glVertex2f(x  +0,y+200);
+		GL11.glEnd();
+		
+		// Bottom-Left box
+		x = -300;
+		y = -300;
+		setColor(pX-1, pY+1, map);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex2f(x    ,y    );
+			GL11.glVertex2f(x+200,y  +0);
+			GL11.glVertex2f(x+200,y+200);
+			GL11.glVertex2f(x  +0,y+200);
+		GL11.glEnd();
+		
+		// Bottom-Right box
+		x = 100;
+		y = -300;
+		setColor(pX+1, pY+1, map);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex2f(x    ,y    );
+			GL11.glVertex2f(x+200,y  +0);
+			GL11.glVertex2f(x+200,y+200);
+			GL11.glVertex2f(x  +0,y+200);
+		GL11.glEnd();
+		
+		// Center box
+		x = -100;
+		y = -100;
+		setColor(pX, pY, map);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex2f(x    ,y    );
+			GL11.glVertex2f(x+200,y  +0);
+			GL11.glVertex2f(x+200,y+200);
+			GL11.glVertex2f(x  +0,y+200);
+		GL11.glEnd();
+		
 		// Player
 		x = -50;
 		y = -50;
-		if(map[pX][pY] == MAP_WIN) {
-			GL11.glColor3f(0,1,0);
-		} else {
-			GL11.glColor3f(1,1,1);
-		}
+		GL11.glColor3f(1,1,1);
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glVertex2f(x    ,y    );
 			GL11.glVertex2f(x+100,y  +0);
