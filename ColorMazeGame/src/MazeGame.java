@@ -10,7 +10,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import recording.ActionStamp;
 
 public class MazeGame {
 	
@@ -31,9 +30,9 @@ public class MazeGame {
 	private static Random generator = new Random();
 	private static int[][] map;	// Universal map array
 	
-	private static ActionStamp [] recActions;
+	private static int [] recActions;
 	private static int currentAction;
-	private static int replayAction;
+	private static int rCurrentAction;
 	private static boolean replay;
 	
 	private static boolean [] keyRefresh;
@@ -53,7 +52,7 @@ public class MazeGame {
 		pY = 0;
 		keyRefresh = new boolean [6];
 		
-		recActions = new ActionStamp [500];
+		recActions = new int [500];
 		replay = false;
 		
 		currentAction = 0;
@@ -88,9 +87,9 @@ public class MazeGame {
 			render();
 			
 			if(replay) {
-				if(replayAction < currentAction) {
-					replayGame(recActions, replayAction);
-					replayAction++;
+				if(rCurrentAction < currentAction) {
+					replayGame(recActions, rCurrentAction);
+					rCurrentAction++;
 				}
 			} else {
 				checkKeys();
@@ -102,8 +101,21 @@ public class MazeGame {
 		Display.destroy();
 	}
 	
-	private static void replayGame(ActionStamp [] s_recActions, int currAction) {
-		movePlayer(s_recActions[currAction].getAction(), pX, pY, map);
+	private static void replayGame(int [] s_recActions, int currAction) {
+		switch(s_recActions[currAction]) {
+		case DIR_DOWN:
+			pY++;
+			break;
+		case DIR_UP:
+			pY--;
+			break;
+		case DIR_RIGHT:
+			pX++;
+			break;
+		case DIR_LEFT:
+			pX--;
+			break;
+		}
 		try {
 		    Thread.sleep(100);
 		} catch(InterruptedException ex) {
@@ -261,7 +273,7 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[DIR_UP]) {
 			if(movePlayer(DIR_UP, pX, pY, map)) {
 				pY--;
-				recActions[currentAction].setAction(DIR_UP);
+				recActions[currentAction] = DIR_UP;
 				currentAction++;
 			}
 			keyRefresh[DIR_UP] = false;
@@ -272,7 +284,7 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[DIR_DOWN]) {
 			if(movePlayer(DIR_DOWN, pX, pY, map)) {
 				pY++;
-				recActions[currentAction].setAction(DIR_DOWN);
+				recActions[currentAction] = DIR_DOWN;
 				currentAction++;
 			}
 			keyRefresh[DIR_DOWN] = false;
@@ -283,7 +295,7 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[DIR_LEFT]) {
 			if(movePlayer(DIR_LEFT, pX, pY, map)) {
 				pX--;
-				recActions[currentAction].setAction(DIR_LEFT);
+				recActions[currentAction] = DIR_LEFT;
 				currentAction++;
 			}
 			keyRefresh[DIR_LEFT] = false;
@@ -294,7 +306,7 @@ public class MazeGame {
 		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[DIR_RIGHT]) {
 			if(movePlayer(DIR_RIGHT, pX, pY, map)) {
 				pX++;
-				recActions[currentAction].setAction(DIR_RIGHT);
+				recActions[currentAction] = DIR_RIGHT;
 				currentAction++;
 			}
 			keyRefresh[DIR_RIGHT] = false;
