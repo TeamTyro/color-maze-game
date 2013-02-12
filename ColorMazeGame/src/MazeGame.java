@@ -4,36 +4,25 @@
  * This is a very simple and minimal map game. It's official name is
  * "Color Maze Game."
  */
+
 import java.util.*;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import sql.InfoPackage;
+import etc.Constants;
 
 public class MazeGame {
-	
-	// Directional constants
-	private static final int DIR_RIGHT = 1;
-	private static final int DIR_LEFT = 2;
-	private static final int DIR_UP = 3;
-	private static final int DIR_DOWN = 4;
-	// Map space constants
-	private static final int MAP_START = 4;
-	private static final int MAP_SPACE = 1;
-	private static final int MAP_BLOCK = 2;
-	private static final int MAP_WIN = 3;
-	// Map property constants
-	private static final int MAP_WIDTH = 16;
-	private static final int MAP_HEIGHT = 16;
-
 	private static Random generator = new Random();
 	private static int[][] map;	// Universal map array
 	
 	private static int [] recActions;
 	private static int currentAction;
 	private static int rCurrentAction;
-	private static boolean replay;
+	private static int operation;
+	private static java.util.Date startDate, endDate;
 	
 	private static boolean [] keyRefresh;
 	
@@ -48,14 +37,16 @@ public class MazeGame {
 		map = makeMaze();
 		printMaze(map);
 		
-		pX = MAP_WIDTH/2;
+		pX = Constants.MAP_WIDTH/2;
 		pY = 0;
 		keyRefresh = new boolean [6];
 		
 		recActions = new int [500];
-		replay = false;
+		operation = 0;
 		
 		currentAction = 0;
+		
+		startDate = new java.util.Date();
 		
 		begin();
 	}
@@ -86,13 +77,27 @@ public class MazeGame {
 			// Rendering
 			render();
 			
-			if(replay) {
+			if(operation == 0) {
+				// Testing in progress
+				checkKeys();
+				if(map[pX][pY] == Constants.MAP_WIN) {
+					endDate = new java.util.Date();
+					if(sendData(packUp(startDate, endDate, recActions))) {
+						System.out.printf("Successfully sent the test data!\n");
+					} else {
+						System.out.printf("ERROR: Failure to send test data!\n");
+					}
+					
+					operation = 2;
+				}
+			} else if(operation == 1) {
+				// Replay debug feature
 				if(rCurrentAction < currentAction) {
 					replayGame(recActions, rCurrentAction);
 					rCurrentAction++;
 				}
-			} else {
-				checkKeys();
+			} else if(operation == 2) {
+				// Test is over
 			}
 			
 			Display.update();
@@ -103,16 +108,16 @@ public class MazeGame {
 	
 	private static void replayGame(int [] s_recActions, int currAction) {
 		switch(s_recActions[currAction]) {
-		case DIR_DOWN:
+		case Constants.DIR_DOWN:
 			pY++;
 			break;
-		case DIR_UP:
+		case Constants.DIR_UP:
 			pY--;
 			break;
-		case DIR_RIGHT:
+		case Constants.DIR_RIGHT:
 			pX++;
 			break;
-		case DIR_LEFT:
+		case Constants.DIR_LEFT:
 			pX--;
 			break;
 		}
@@ -246,19 +251,19 @@ public class MazeGame {
 	 * coordinates on the given map.
 	 */
 	private static void setColor(int x, int y, int [][] tmap) {
-		if(x<0 || y<0 || x>MAP_WIDTH-1 || y>MAP_HEIGHT-1) {
+		if(x<0 || y<0 || x>Constants.MAP_WIDTH-1 || y>Constants.MAP_HEIGHT-1) {
 			GL11.glColor3f(1,0,0);
 			return;
 		}
 		
 		switch(tmap[x][y]) {
-		case MAP_BLOCK:
+		case Constants.MAP_BLOCK:
 			GL11.glColor3f(1,0,0);
 			break;
-		case MAP_SPACE:
+		case Constants.MAP_SPACE:
 			GL11.glColor3f(0,0,1);
 			break;
-		case MAP_WIN:
+		case Constants.MAP_WIN:
 			GL11.glColor3f(0,1,0);
 			break;
 		}
@@ -270,54 +275,54 @@ public class MazeGame {
 	 */
 	private static void checkKeys() {
 		// Check for "Up" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[DIR_UP]) {
-			if(movePlayer(DIR_UP, pX, pY, map)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[Constants.DIR_UP]) {
+			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {
 				pY--;
-				recActions[currentAction] = DIR_UP;
+				recActions[currentAction] = Constants.DIR_UP;
 				currentAction++;
 			}
-			keyRefresh[DIR_UP] = false;
+			keyRefresh[Constants.DIR_UP] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-			keyRefresh[DIR_UP] = true;
+			keyRefresh[Constants.DIR_UP] = true;
 		}
 		// Check for "Down" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[DIR_DOWN]) {
-			if(movePlayer(DIR_DOWN, pX, pY, map)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[Constants.DIR_DOWN]) {
+			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
 				pY++;
-				recActions[currentAction] = DIR_DOWN;
+				recActions[currentAction] = Constants.DIR_DOWN;
 				currentAction++;
 			}
-			keyRefresh[DIR_DOWN] = false;
+			keyRefresh[Constants.DIR_DOWN] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-			keyRefresh[DIR_DOWN] = true;
+			keyRefresh[Constants.DIR_DOWN] = true;
 		}
 		// Check for "Left" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[DIR_LEFT]) {
-			if(movePlayer(DIR_LEFT, pX, pY, map)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[Constants.DIR_LEFT]) {
+			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
 				pX--;
-				recActions[currentAction] = DIR_LEFT;
+				recActions[currentAction] = Constants.DIR_LEFT;
 				currentAction++;
 			}
-			keyRefresh[DIR_LEFT] = false;
+			keyRefresh[Constants.DIR_LEFT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-			keyRefresh[DIR_LEFT] = true;
+			keyRefresh[Constants.DIR_LEFT] = true;
 		}
 		// Check for "Right" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[DIR_RIGHT]) {
-			if(movePlayer(DIR_RIGHT, pX, pY, map)) {
+		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[Constants.DIR_RIGHT]) {
+			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
 				pX++;
-				recActions[currentAction] = DIR_RIGHT;
+				recActions[currentAction] = Constants.DIR_RIGHT;
 				currentAction++;
 			}
-			keyRefresh[DIR_RIGHT] = false;
+			keyRefresh[Constants.DIR_RIGHT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-			keyRefresh[DIR_RIGHT] = true;
+			keyRefresh[Constants.DIR_RIGHT] = true;
 		}
 		// Check for "R" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_R) && keyRefresh[5]) {
 			keyRefresh[5] = false;
-			replay = true;
-			pX = MAP_WIDTH/2;
+			operation = 1;
+			pX = Constants.MAP_WIDTH/2;
 			pY = 0;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_R)) {
 			keyRefresh[5] = true;
@@ -330,9 +335,9 @@ public class MazeGame {
 	 */
 	private static boolean movePlayer(int dir, int x, int y, int [][] tmap) {
 		switch(dir) {
-		case DIR_UP:
+		case Constants.DIR_UP:
 			if(y>0) {
-				if(tmap[x][y-1] != MAP_BLOCK) {
+				if(tmap[x][y-1] != Constants.MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -341,9 +346,9 @@ public class MazeGame {
 				return false;
 			}
 			// break;
-		case DIR_DOWN:
-			if(y<MAP_HEIGHT-1) {
-				if(tmap[x][y+1] != MAP_BLOCK) {
+		case Constants.DIR_DOWN:
+			if(y<Constants.MAP_HEIGHT-1) {
+				if(tmap[x][y+1] != Constants.MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -352,9 +357,9 @@ public class MazeGame {
 				return false;
 			}
 			// break;
-		case DIR_LEFT:
+		case Constants.DIR_LEFT:
 			if(x>0) {
-				if(tmap[x-1][y] != MAP_BLOCK) {
+				if(tmap[x-1][y] != Constants.MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -362,9 +367,9 @@ public class MazeGame {
 			} else {
 				return false;
 			}
-		case DIR_RIGHT:
-			if(x<MAP_HEIGHT-1) {
-				if(tmap[x+1][y] != MAP_BLOCK) {
+		case Constants.DIR_RIGHT:
+			if(x<Constants.MAP_HEIGHT-1) {
+				if(tmap[x+1][y] != Constants.MAP_BLOCK) {
 					return true;
 				} else {
 					return false;
@@ -379,22 +384,37 @@ public class MazeGame {
 		return false;
 	}
 	
+	private static InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
+		InfoPackage out = new InfoPackage();
+		
+		out.setDates(sD, eD);
+		out.setActions(a);
+		
+		return out;
+	}
+	
+	private static boolean sendData(InfoPackage d) {
+		boolean success = false;
+		
+		return success;
+	}
+	
 	/* Function makeMaze()
 	 * Randomly creates a maze by drawing lines of a random
 	 * direction and size and returns a two dimensional
 	 * array with the map information.
 	 */
 	private static int[][] makeMaze() {
-		int [][] out = new int [MAP_WIDTH][MAP_HEIGHT];
-		for(int x=0; x<MAP_WIDTH; x++) {
-			for(int y=0; y<MAP_HEIGHT; y++) {
-				out[x][y] = MAP_BLOCK;
+		int [][] out = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+		for(int x=0; x<Constants.MAP_WIDTH; x++) {
+			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
+				out[x][y] = Constants.MAP_BLOCK;
 			}
 		}
 		
-		int x = MAP_WIDTH/2;
+		int x = Constants.MAP_WIDTH/2;
 		int y = 0;
-		out[x][y] = MAP_SPACE;
+		out[x][y] = Constants.MAP_SPACE;
 		int lastDir = -1;
 		for(int i=0; i<20; i++) {
 			int dir = generator.nextInt(4);
@@ -405,17 +425,17 @@ public class MazeGame {
 			switch (dir) {
 			case 0:		//Go down
 				for(int j=0; j<len; j++) {
-					if(y < MAP_WIDTH-1) {
+					if(y < Constants.MAP_WIDTH-1) {
 						y+=1;
-						out[x][y] = MAP_SPACE;
+						out[x][y] = Constants.MAP_SPACE;
 					}
 				}
 				break;
 			case 1:		//Go right
 				for(int j=0; j<len; j++) {
-					if(x < MAP_HEIGHT-1) {
+					if(x < Constants.MAP_HEIGHT-1) {
 						x+=1;
-						out[x][y] = MAP_SPACE;
+						out[x][y] = Constants.MAP_SPACE;
 					}
 				}
 				break;
@@ -423,7 +443,7 @@ public class MazeGame {
 				for(int j=0; j<len; j++) {
 					if(x > 0) {
 						x-=1;
-						out[x][y] = MAP_SPACE;
+						out[x][y] = Constants.MAP_SPACE;
 					}
 				}
 				break;
@@ -431,7 +451,7 @@ public class MazeGame {
 				for(int j=0; j<len; j++) {
 					if(y>0) {
 						y-=1;
-						out[x][y] = MAP_SPACE;
+						out[x][y] = Constants.MAP_SPACE;
 					}
 				}
 				break;
@@ -441,7 +461,7 @@ public class MazeGame {
 			lastDir = dir;
 		}
 		
-		out[x][y] = MAP_WIN;
+		out[x][y] = Constants.MAP_WIN;
 		
 		return out;
 	}
@@ -450,30 +470,30 @@ public class MazeGame {
 	 * Prints the given map as text.
 	 */
 	private static void printMaze(int[][] tmap) {
-		for(int x=0; x<MAP_WIDTH+2; x++) {
+		for(int x=0; x<Constants.MAP_WIDTH+2; x++) {
 			System.out.printf("[-]");
 		}
 		System.out.println("");
-		for (int y = 0; y < MAP_WIDTH; y++) {
+		for (int y = 0; y < Constants.MAP_WIDTH; y++) {
 			System.out.printf("[|]");
-			for (int x = 0; x < MAP_HEIGHT; x++) {
+			for (int x = 0; x < Constants.MAP_HEIGHT; x++) {
 				switch (tmap[x][y]) {
-				case MAP_START:
+				case Constants.MAP_START:
 					System.out.printf(" s ");
-				case MAP_BLOCK:
+				case Constants.MAP_BLOCK:
 					System.out.printf("[ ]");
 					break;
-				case MAP_SPACE:
+				case Constants.MAP_SPACE:
 					System.out.printf("   ");
 					break;
-				case MAP_WIN:
+				case Constants.MAP_WIN:
 					System.out.printf(" w ");
 				}
 			}
 			System.out.printf("[|]");
 			System.out.println("");
 		}
-		for(int x=0; x<MAP_WIDTH+2; x++) {
+		for(int x=0; x<Constants.MAP_WIDTH+2; x++) {
 			System.out.printf("[-]");
 		}
 		
