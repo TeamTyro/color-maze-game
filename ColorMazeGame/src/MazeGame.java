@@ -11,6 +11,9 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import sql.InfoPackage;
 import etc.Constants;
 
@@ -396,6 +399,16 @@ public class MazeGame {
 	private static boolean sendData(InfoPackage d) {
 		boolean success = false;
 		
+		Connection conn = null;
+		Properties connProps = new Properties();
+		connProps.put("user", "c0smic_tyro");
+		connProps.put("password", "2$M*k^4!?oDm");
+		
+		try {
+			conn = DriverManager.getConnection("jdbc:mysql://jackketcham.com:3306/", connProps);
+		} catch (SQLException ex) {
+			System.out.printf("ERROR: getConnection()\n");
+		}
 		return success;
 	}
 	

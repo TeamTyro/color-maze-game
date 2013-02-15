@@ -9,5 +9,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/xavi/JavaLibs/lwjgl-2.8.5/jar/jinput.jar"/>
 	<classpathentry kind="lib" path="/home/xavi/JavaLibs/lwjgl-2.8.5/jar/lwjgl_util.jar"/>
+	<classpathentry kind="lib" path="/home/xavi/JavaLibs/mysql-connector-java-5.1.23/mysql-connector-java-5.1.23-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
