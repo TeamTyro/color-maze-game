@@ -19,7 +19,7 @@ public class InfoPackage {
 		d_end = e;
 	}
 	
-	public void setActions(int [] a) {
+	public void setActions(int [] a) {//sends in action array. a[] is the actions[]
 		for(int i=0; i<500; i++) {
 			if(a[i] != Constants.DIR_LEFT && a[i] != Constants.DIR_RIGHT && a[i] != Constants.DIR_UP && a[i] != Constants.DIR_DOWN && a[i] != 0) {
 				System.out.printf("ERROR (IP): Unexpected action value!\n");
