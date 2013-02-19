@@ -47,7 +47,7 @@ public class MazeGame {
 		startDate = new java.util.Date();
 		
 		MazeMap maze = new MazeMap();
-		maze.loadMap("map2.txt");
+		maze.loadMap("map1.txt");
 		
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
