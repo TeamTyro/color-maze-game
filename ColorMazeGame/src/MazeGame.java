@@ -5,35 +5,46 @@
  * "Color Maze Game."
  */
 
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Random;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+
 import sql.InfoPackage;
 import etc.Constants;
 import etc.MazeMap;
 
 public class MazeGame {
 	private static Random generator = new Random();
-	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
-	
+	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
 	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]
 	private static int currentAction; 	// Keeps track of which part of recActions your using. Basically just a counter for recActions
 	private static int rCurrentAction;	// Replay current action, just for replaying
 	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
-	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
-	
+	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.	
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
-	
 	private static int pX, pY;			// Player x and y (within the map array)
 
+	public static GeneticAlgorithm ai;
+	public static int[] inputs;
+	
+	/*
+	 * System.out.println("Enter something here : ");
+	 * 
+	 * */
+	
 	/* Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
+		
 		System.out.printf("Cheater's map:\n");
 		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
 		
@@ -68,19 +79,7 @@ public class MazeGame {
 	 * Sets up OpenGL and lwjgl and contains the main loop.
 	 */
 	private static void begin() {
-		try {
-			Display.setDisplayMode(new DisplayMode(600,600));
-			Display.create();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
-		// Init OpenGL
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		setUpScreen();
 		
 		// Start main loop
 		while(!Display.isCloseRequested()) {
@@ -93,6 +92,8 @@ public class MazeGame {
 			if(operation == 0) {
 				// Testing in progress
 				checkKeys();
+				
+				//Once you win
 				if(map[pX][pY] == Constants.MAP_WIN) {
 					endDate = new java.util.Date();
 					if(sendData(packUp(startDate, endDate, recActions))) {
@@ -119,6 +120,92 @@ public class MazeGame {
 		Display.destroy();
 	}
 	
+	/*Tool for reading lines from console
+	 * */
+	private static int readInfo(String prompt){
+		
+		//System.out.printf(prompt + "\n");//prompt
+		System.out.printf(prompt);//prompt
+		
+		//read information from console
+		try{
+		    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+		    String s = bufferRead.readLine();
+	 
+		    int x = Integer.parseInt(s);
+		    return x;
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		return -10000;
+	}
+	
+	/* Function checkKeys()
+	 * Reads for key input and acts accordingly. More specifically,
+	 * the player is moved from arrow key presses.
+	 */
+	private static void checkKeys() {
+		// Check for "Up" key
+		if( ai.getOutput(inputs) == 0 && Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[Constants.DIR_UP]) {
+			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {
+				pY--;
+				recActions[currentAction] = Constants.DIR_UP;
+				currentAction++;
+			}
+			keyRefresh[Constants.DIR_UP] = false;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+			keyRefresh[Constants.DIR_UP] = true;
+		}
+		// Check for "Down" key
+		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[Constants.DIR_DOWN]) {
+			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
+				pY++;
+				recActions[currentAction] = Constants.DIR_DOWN;
+				currentAction++;
+			}
+			keyRefresh[Constants.DIR_DOWN] = false;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+			keyRefresh[Constants.DIR_DOWN] = true;
+		}
+		// Check for "Left" key
+		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[Constants.DIR_LEFT]) {
+			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
+				pX--;
+				recActions[currentAction] = Constants.DIR_LEFT;
+				currentAction++;
+			}
+			keyRefresh[Constants.DIR_LEFT] = false;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
+			keyRefresh[Constants.DIR_LEFT] = true;
+		}
+		// Check for "Right" key
+		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[Constants.DIR_RIGHT]) {
+			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
+				pX++;
+				recActions[currentAction] = Constants.DIR_RIGHT;
+				currentAction++;
+			}
+			keyRefresh[Constants.DIR_RIGHT] = false;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
+			keyRefresh[Constants.DIR_RIGHT] = true;
+		}
+		// Check for "R" key
+		if(Keyboard.isKeyDown(Keyboard.KEY_R) && keyRefresh[5]) {
+			keyRefresh[5] = false;
+			operation = 1;
+			pX = Constants.MAP_WIDTH/2;
+			pY = 0;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_R)) {
+			keyRefresh[5] = true;
+		}
+	}
+	
+	
+	
+	
+	
 	private static void replayGame(int [] s_recActions, int currAction) {
 		switch(s_recActions[currAction]) {
 		case Constants.DIR_DOWN:
@@ -139,6 +226,24 @@ public class MazeGame {
 		} catch(InterruptedException ex) {
 		    Thread.currentThread().interrupt();
 		}
+	}
+	
+	private static void setUpScreen(){
+		try {
+			Display.setDisplayMode(new DisplayMode(600,600));
+			Display.create();
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+		
+		// Init OpenGLff
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		
+		readInfo("Test: ");
 	}
 	
 	/* Function render()
@@ -282,66 +387,6 @@ public class MazeGame {
 		case Constants.MAP_START:
 			GL11.glColor3f(1,1,0);
 			break;
-		}
-	}
-	
-	/* Function checkKeys()
-	 * Reads for key input and acts accordingly. More specifically,
-	 * the player is moved from arrow key presses.
-	 */
-	private static void checkKeys() {
-		// Check for "Up" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[Constants.DIR_UP]) {
-			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {
-				pY--;
-				recActions[currentAction] = Constants.DIR_UP;
-				currentAction++;
-			}
-			keyRefresh[Constants.DIR_UP] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-			keyRefresh[Constants.DIR_UP] = true;
-		}
-		// Check for "Down" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[Constants.DIR_DOWN]) {
-			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
-				pY++;
-				recActions[currentAction] = Constants.DIR_DOWN;
-				currentAction++;
-			}
-			keyRefresh[Constants.DIR_DOWN] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-			keyRefresh[Constants.DIR_DOWN] = true;
-		}
-		// Check for "Left" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[Constants.DIR_LEFT]) {
-			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
-				pX--;
-				recActions[currentAction] = Constants.DIR_LEFT;
-				currentAction++;
-			}
-			keyRefresh[Constants.DIR_LEFT] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-			keyRefresh[Constants.DIR_LEFT] = true;
-		}
-		// Check for "Right" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[Constants.DIR_RIGHT]) {
-			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
-				pX++;
-				recActions[currentAction] = Constants.DIR_RIGHT;
-				currentAction++;
-			}
-			keyRefresh[Constants.DIR_RIGHT] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-			keyRefresh[Constants.DIR_RIGHT] = true;
-		}
-		// Check for "R" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_R) && keyRefresh[5]) {
-			keyRefresh[5] = false;
-			operation = 1;
-			pX = Constants.MAP_WIDTH/2;
-			pY = 0;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			keyRefresh[5] = true;
 		}
 	}
 	
