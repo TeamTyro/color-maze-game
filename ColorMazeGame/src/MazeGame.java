@@ -11,9 +11,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.net.*;
+import java.io.*;
 import sql.InfoPackage;
 import etc.Constants;
 
@@ -397,19 +396,33 @@ public class MazeGame {
 	}
 	
 	private static boolean sendData(InfoPackage d) {
-		boolean success = false;
-		
-		Connection conn = null;
-		Properties connProps = new Properties();
-		connProps.put("user", "c0smic_tyro");
-		connProps.put("password", "2$M*k^4!?oDm");
+		URL site;
+		HttpURLConnection conn;
 		
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://jackketcham.com:3306/", connProps);
-		} catch (SQLException ex) {
-			System.out.printf("ERROR: getConnection()\n");
+			site = new URL("http://jackketcham.com/teamtyro");
+		} catch(MalformedURLException ex) {
+			System.out.printf("ERROR: Malformed URL!\n");
+			return false;
 		}
-		return success;
+		
+		try {
+			conn = (HttpURLConnection) site.openConnection();
+		} catch(IOException ex) {
+			System.out.printf("ERROR: Cannot connect!");
+			return false;
+		}
+		
+		conn.setDoOutput(true);
+		conn.setInstanceFollowRedirects(false);
+		try {
+			conn.setRequestMethod("POST");
+		} catch(ProtocolException ex) {
+			System.out.printf("ERROR: Can't set request method!\n");
+		}
+		conn.setRequestProperty("Content-Type", "application/xml");
+		
+		return true;
 	}
 	
 	/* Function makeMaze()
@@ -432,7 +445,8 @@ public class MazeGame {
 		for(int i=0; i<20; i++) {
 			int dir = generator.nextInt(4);
 			int len = generator.nextInt(4);
-			while( (dir==0 && lastDir==3) || (dir==1 && lastDir == 2) || (dir==2 && lastDir==1) || (dir==3 && lastDir==0) ) {
+			while( (dir==0 && lastDir==3) || (dir==1 && lastDir == 2) || 
+					(dir==2 && lastDir==1) || (dir==3 && lastDir==0) ) {
 				dir = generator.nextInt(4);
 			}
 			switch (dir) {
