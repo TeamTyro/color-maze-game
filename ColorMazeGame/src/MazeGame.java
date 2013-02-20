@@ -31,8 +31,9 @@ public class MazeGame {
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	private static int pX, pY;			// Player x and y (within the map array)
 
-	public static GeneticAlgorithm ai;
-	public static int[] inputs;
+	public static int[] inputs = new int[3];
+	public static int runs = 10;
+	public static GeneticAlgorithm ai; //is set up in the begin method
 	
 	/*
 	 * System.out.println("Enter something here : ");
@@ -80,7 +81,7 @@ public class MazeGame {
 	 */
 	private static void begin() {
 		setUpScreen();
-		
+		ai = new GeneticAlgorithm(runs);
 		// Start main loop
 		while(!Display.isCloseRequested()) {
 			// Clears screen and depth buffer
@@ -91,7 +92,16 @@ public class MazeGame {
 			
 			if(operation == 0) {
 				// Testing in progress
-				checkKeys();
+				for(int i = 0; i < runs; i++){
+					checkKeys(i);
+					
+					//slows down the thread
+					try 
+					    Thread.sleep(200);
+					} catch(InterruptedException ex) {
+					    Thread.currentThread().interrupt();
+					}
+				}
 				
 				//Once you win
 				if(map[pX][pY] == Constants.MAP_WIN) {
@@ -146,51 +156,47 @@ public class MazeGame {
 	 * Reads for key input and acts accordingly. More specifically,
 	 * the player is moved from arrow key presses.
 	 */
-	private static void checkKeys() {
+	private static void checkKeys(int run) {
 		// Check for "Up" key
-		if( ai.getOutput(inputs) == 0 && Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[Constants.DIR_UP]) {
-			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {
+		
+		if( ai.getOutput(run, inputs) == 0 ) {//if output says go up
+			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {//checks if you can or can't move into that space
 				pY--;
 				recActions[currentAction] = Constants.DIR_UP;
 				currentAction++;
+			}else{//if you couldn't move into that spot
+				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
-			keyRefresh[Constants.DIR_UP] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-			keyRefresh[Constants.DIR_UP] = true;
 		}
-		// Check for "Down" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_DOWN) && keyRefresh[Constants.DIR_DOWN]) {
+		if( ai.getOutput(run, inputs) == 1 ) {//if output says go up
 			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
 				pY++;
 				recActions[currentAction] = Constants.DIR_DOWN;
 				currentAction++;
+			}else{//if you couldn't move into that spot
+				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
-			keyRefresh[Constants.DIR_DOWN] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-			keyRefresh[Constants.DIR_DOWN] = true;
 		}
-		// Check for "Left" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_LEFT) && keyRefresh[Constants.DIR_LEFT]) {
+		if( ai.getOutput(run, inputs) == 2 ) {//if output says go up
 			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
 				pX--;
 				recActions[currentAction] = Constants.DIR_LEFT;
 				currentAction++;
+			}else{//if you couldn't move into that spot
+				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
-			keyRefresh[Constants.DIR_LEFT] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-			keyRefresh[Constants.DIR_LEFT] = true;
 		}
-		// Check for "Right" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_RIGHT) && keyRefresh[Constants.DIR_RIGHT]) {
+		if( ai.getOutput(run, inputs) == 3 ) {//if output says go up
 			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
 				pX++;
 				recActions[currentAction] = Constants.DIR_RIGHT;
 				currentAction++;
+			}else{//if you couldn't move into that spot
+				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
-			keyRefresh[Constants.DIR_RIGHT] = false;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-			keyRefresh[Constants.DIR_RIGHT] = true;
 		}
+		
+		/*
 		// Check for "R" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_R) && keyRefresh[5]) {
 			keyRefresh[5] = false;
@@ -200,6 +206,7 @@ public class MazeGame {
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_R)) {
 			keyRefresh[5] = true;
 		}
+		*/
 	}
 	
 	
@@ -243,7 +250,6 @@ public class MazeGame {
 		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
-		readInfo("Test: ");
 	}
 	
 	/* Function render()
