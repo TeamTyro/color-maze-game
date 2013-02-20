@@ -15,6 +15,7 @@ import java.net.*;
 import java.io.*;
 import sql.InfoPackage;
 import etc.Constants;
+import sql.XMLParser;
 
 public class MazeGame {
 	private static Random generator = new Random();
@@ -391,6 +392,8 @@ public class MazeGame {
 		
 		out.setDates(sD, eD);
 		out.setActions(a);
+		
+		XMLParser parser = new XMLParser(out);
 		
 		return out;
 	}

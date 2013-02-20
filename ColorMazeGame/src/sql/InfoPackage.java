@@ -29,6 +29,10 @@ public class InfoPackage {
 		}
 	}
 	
+	public int [] getActions() {
+		return _actions;
+	}
+	
 	public java.util.Date getDate(int which) {
 		if(which == 1) {
 			return d_start;
