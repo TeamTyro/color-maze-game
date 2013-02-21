@@ -27,6 +27,8 @@ public class MazeGame {
 	private static int operation;
 	private static java.util.Date startDate, endDate;
 	
+	private static XMLParser xml;
+	
 	private static boolean [] keyRefresh;
 	
 	private static int pX, pY;	// Player x and y (within the map array)
@@ -393,7 +395,7 @@ public class MazeGame {
 		out.setDates(sD, eD);
 		out.setActions(a);
 		
-		XMLParser parser = new XMLParser(out);
+		xml = new XMLParser(out);
 		
 		return out;
 	}
@@ -401,9 +403,10 @@ public class MazeGame {
 	private static boolean sendData(InfoPackage d) {
 		URL site;
 		HttpURLConnection conn;
+		DataOutputStream outStream;
 		
 		try {
-			site = new URL("http://jackketcham.com/teamtyro");
+			site = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
 		} catch(MalformedURLException ex) {
 			System.out.printf("ERROR: Malformed URL!\n");
 			return false;
@@ -416,15 +419,39 @@ public class MazeGame {
 			return false;
 		}
 		
+		conn.setDoInput(true);
 		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		
 		conn.setInstanceFollowRedirects(false);
 		try {
 			conn.setRequestMethod("POST");
 		} catch(ProtocolException ex) {
 			System.out.printf("ERROR: Can't set request method!\n");
+			return false;
 		}
 		conn.setRequestProperty("Content-Type", "application/xml");
 		
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		String xmlStr = xml.getXML();
+        conn.setRequestProperty("Content-Length", ""+xmlStr);
+        
+        try {
+	        outStream = new DataOutputStream(conn.getOutputStream());
+        } catch(IOException ex) {
+        	System.out.printf("ERROR: Cannot make outStream & inStream!\n");
+        	return false;
+        }
+        
+        try {
+       		outStream.writeBytes(xmlStr);
+       		outStream.flush();
+       		outStream.close();
+        } catch(IOException ex) {
+        	System.out.printf("ERROR: Cannot send XML data.\n");
+        	return false;
+        }
+        
 		return true;
 	}
 	

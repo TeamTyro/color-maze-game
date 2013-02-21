@@ -21,15 +21,15 @@ public class XMLParser {
 		String x_4_e = "</moves>";
 		
 		xml = "";
-		xml = xml.concat(x_1_s + "\n");
+		xml = xml.concat(x_1_s);
 		
 			xml = xml.concat(x_2_s);
-				xml = xml.concat(String.valueOf(pack.getDate(1)) + "\n");
-			xml = xml.concat(x_2_e + "\n");
+				xml = xml.concat(String.valueOf(pack.getDate(1)));
+			xml = xml.concat(x_2_e);
 			
 			xml = xml.concat(x_3_s);
-				xml = xml.concat(String.valueOf(pack.getDate(2)) + "\n");
-			xml = xml.concat(x_3_e + "\n");
+				xml = xml.concat(String.valueOf(pack.getDate(2)));
+			xml = xml.concat(x_3_e);
 			
 			xml = xml.concat(x_4_s);
 				int [] actions = pack.getActions();
@@ -52,9 +52,11 @@ public class XMLParser {
 					index++;
 				}
 				
-			xml = xml.concat(x_4_e + "\n");
+			xml = xml.concat(x_4_e);
 		xml = xml.concat(x_1_e);
-		
-		System.out.printf("%s\n", xml);
+	}
+	
+	public String getXML() {
+		return xml;
 	}
 }
