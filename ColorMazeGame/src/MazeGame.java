@@ -33,7 +33,7 @@ public class MazeGame {
 	
 	private static int pX, pY;	// Player x and y (within the map array)
 
-	/* Function main(String args[])
+	/** Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
 	 */
@@ -56,7 +56,7 @@ public class MazeGame {
 		begin();
 	}
 	
-	/* Function begin()
+	/** Function begin()
 	 * Sets up OpenGL and lwjgl and contains the main loop.
 	 */
 	private static void begin() {
@@ -133,7 +133,7 @@ public class MazeGame {
 		}
 	}
 	
-	/* Function render()
+	/** Function render()
 	 * Draws all visible objects.
 	 */
 	private static void render() {
@@ -251,7 +251,7 @@ public class MazeGame {
 		GL11.glEnd();
 	}
 	
-	/* Function setColor(int x, int y, int [][] tmap)
+	/** Function setColor(int x, int y, int [][] tmap)
 	 * Returns a fitting color based on what is on the given
 	 * coordinates on the given map.
 	 */
@@ -274,7 +274,7 @@ public class MazeGame {
 		}
 	}
 	
-	/* Function checkKeys()
+	/** Function checkKeys()
 	 * Reads for key input and acts accordingly. More specifically,
 	 * the player is moved from arrow key presses.
 	 */
@@ -334,7 +334,7 @@ public class MazeGame {
 		}
 	}
 	
-	/* Function movePlayer(int dir, int x, int y, int [][] tmap)
+	/** Function movePlayer(int dir, int x, int y, int [][] tmap)
 	 * Checks move requests for validity. Returns true if no
 	 * obstructions would keep the player from moving in that direction.
 	 */
@@ -455,7 +455,7 @@ public class MazeGame {
 		return true;
 	}
 	
-	/* Function makeMaze()
+	/** Function makeMaze()
 	 * Randomly creates a maze by drawing lines of a random
 	 * direction and size and returns a two dimensional
 	 * array with the map information.
@@ -523,7 +523,7 @@ public class MazeGame {
 		return out;
 	}
 	
-	/* Function printMaze(int[][] tmap)
+	/** Function printMaze(int[][] tmap)
 	 * Prints the given map as text.
 	 */
 	private static void printMaze(int[][] tmap) {
