@@ -401,57 +401,39 @@ public class MazeGame {
 	}
 	
 	private static boolean sendData(InfoPackage d) {
-		URL site;
-		HttpURLConnection conn;
-		DataOutputStream outStream;
-		
+		String contentType = "text/xml";
+		String charset = "ISO-8859-1";
+		String request = null;
 		try {
-			site = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
-		} catch(MalformedURLException ex) {
-			System.out.printf("ERROR: Malformed URL!\n");
-			return false;
+		    request = String.format("%s", URLEncoder.encode(xml.getXML(), charset));
+		} catch (UnsupportedEncodingException e1) {
+		    e1.printStackTrace();
+		}
+		URL url = null;
+		URLConnection connection = null;
+		OutputStream output = null;
+		InputStream response = null;
+		try {
+		    url = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
+		} catch (MalformedURLException e) {
+		    e.printStackTrace();
+		}
+
+		try {
+		    connection = url.openConnection();
+		    connection.setDoOutput(true);
+		    connection.setRequestProperty("Accept-Charset", charset);
+		    connection.setRequestProperty("Content-Type", contentType);
+		    output = connection.getOutputStream();
+		    output.write(request.getBytes("ISO-8859-1"));
+		    if(output != null) {
+		    	try { output.close(); } catch (IOException e) {}
+		    }
+		    response = connection.getInputStream();
+		} catch (IOException e) {
+		    e.printStackTrace();
 		}
 		
-		try {
-			conn = (HttpURLConnection) site.openConnection();
-		} catch(IOException ex) {
-			System.out.printf("ERROR: Cannot connect!");
-			return false;
-		}
-		
-		conn.setDoInput(true);
-		conn.setDoOutput(true);
-		conn.setUseCaches(false);
-		
-		conn.setInstanceFollowRedirects(false);
-		try {
-			conn.setRequestMethod("POST");
-		} catch(ProtocolException ex) {
-			System.out.printf("ERROR: Can't set request method!\n");
-			return false;
-		}
-		conn.setRequestProperty("Content-Type", "application/xml");
-		
-		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		String xmlStr = xml.getXML();
-        conn.setRequestProperty("Content-Length", ""+xmlStr);
-        
-        try {
-	        outStream = new DataOutputStream(conn.getOutputStream());
-        } catch(IOException ex) {
-        	System.out.printf("ERROR: Cannot make outStream & inStream!\n");
-        	return false;
-        }
-        
-        try {
-       		outStream.writeBytes(xmlStr);
-       		outStream.flush();
-       		outStream.close();
-        } catch(IOException ex) {
-        	System.out.printf("ERROR: Cannot send XML data.\n");
-        	return false;
-        }
-        
 		return true;
 	}
 	
