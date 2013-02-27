@@ -31,7 +31,8 @@ public class MazeGame {
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	private static int pX, pY;			// Player x and y (within the map array)
 
-	public static int[] inputs = new int[3];
+	public static int[] inputs = new int[4];
+	//public static int[][] blockRepeat;//Counts how many times the player has been on each block of the map. This is used to prevent the bot getting into loops.
 	public static int runs = 10;
 	public static GeneticAlgorithm ai; //is set up in the begin method
 	
@@ -80,50 +81,53 @@ public class MazeGame {
 	 * Sets up OpenGL and lwjgl and contains the main loop.
 	 */
 	private static void begin() {
+		
 		setUpScreen();
+		
 		ai = new GeneticAlgorithm(runs);
+		int run = 0;//will keep track of all the runs
+		
 		// Start main loop
 		while(!Display.isCloseRequested()) {
-			// Clears screen and depth buffer
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			
-			// Rendering
-			render();
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer
+			render();															// Rendering
 			
 			if(operation == 0) {
+				
 				// Testing in progress
-				for(int i = 0; i < runs; i++){
-					checkKeys(i);
+				if(continueRun()) {	//if you have not won yet
 					
-					//slows down the thread
-					try 
+					setInputs();
+					checkKeys(run);		//updates the inputs[] array to the current screen
+					
+					try {				//slows down the thread
 					    Thread.sleep(200);
 					} catch(InterruptedException ex) {
 					    Thread.currentThread().interrupt();
 					}
-				}
 				
-				//Once you win
-				if(map[pX][pY] == Constants.MAP_WIN) {
+				
+				}else{//Once the run has been won
+					
+					if(run < runs){//if you still have more runs to complete
+						run = run++;//move to the next run
+					}else{
+						operation = 1;//if all runs are complete, move on to operation 1
+					}
+					/*
 					endDate = new java.util.Date();
 					if(sendData(packUp(startDate, endDate, recActions))) {
 						System.out.printf("Successfully sent the test data!\n");
 					} else {
 						System.out.printf("ERROR: Failure to send test data!\n");
 					}
-					
-					operation = 2;
+					*/
 				}
-			} else if(operation == 1) {
-				// Replay debug feature
-				if(rCurrentAction < currentAction) {
-					replayGame(recActions, rCurrentAction);
-					rCurrentAction++;
-				}
-			} else if(operation == 2) {
-				// Test is over
-			}
-			
+			} else if(operation == 1) {//will run once all runs are over for that particular generation
+
+				
+			} 
 			Display.update();
 		}
 		
@@ -157,7 +161,6 @@ public class MazeGame {
 	 * the player is moved from arrow key presses.
 	 */
 	private static void checkKeys(int run) {
-		// Check for "Up" key
 		
 		if( ai.getOutput(run, inputs) == 0 ) {//if output says go up
 			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {//checks if you can or can't move into that space
@@ -168,7 +171,7 @@ public class MazeGame {
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
 		}
-		if( ai.getOutput(run, inputs) == 1 ) {//if output says go up
+		if( ai.getOutput(run, inputs) == 1 ) {//if output says go down
 			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
 				pY++;
 				recActions[currentAction] = Constants.DIR_DOWN;
@@ -177,7 +180,7 @@ public class MazeGame {
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
 		}
-		if( ai.getOutput(run, inputs) == 2 ) {//if output says go up
+		if( ai.getOutput(run, inputs) == 2 ) {//if output says go left
 			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
 				pX--;
 				recActions[currentAction] = Constants.DIR_LEFT;
@@ -186,7 +189,7 @@ public class MazeGame {
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
 		}
-		if( ai.getOutput(run, inputs) == 3 ) {//if output says go up
+		if( ai.getOutput(run, inputs) == 3 ) {//if output says go right
 			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
 				pX++;
 				recActions[currentAction] = Constants.DIR_RIGHT;
@@ -209,9 +212,42 @@ public class MazeGame {
 		*/
 	}
 	
+	private static void setInputs(){//0 = open block, 1 = closed block
+		
+		if(movePlayer(Constants.DIR_UP, pX, pY, map)){//if there is an open space above you
+			inputs[0] = 0;//0 = up
+		}else{//if there's not an open space above you
+			inputs[0] = 1;//1 = down
+		}
+		
+		if(movePlayer(Constants.DIR_DOWN, pX, pY, map)){//if there's an open spot below you
+			inputs[1] = 0;//1 = down
+		}else{
+			inputs[1] = 1;//1 = down
+		}
+		
+		if(movePlayer(Constants.DIR_LEFT, pX, pY, map)){//if there's an open spot left of you
+			inputs[2] = 0;//2 = left
+		}else{
+			inputs[2] = 1;//2 = left
+		}
+		
+		if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)){//if there's an open spot right of you
+			inputs[3] = 0;//3 = right
+		}else{
+			inputs[3] = 1;//3 = right
+		}
+	}
 	
-	
-	
+	private static boolean continueRun(){
+		
+		if(map[pX][pY] == Constants.MAP_WIN){
+			return false;
+		}else{
+			return true;
+		}
+		
+	}
 	
 	private static void replayGame(int [] s_recActions, int currAction) {
 		switch(s_recActions[currAction]) {
