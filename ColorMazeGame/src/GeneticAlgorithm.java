@@ -73,7 +73,11 @@ public class GeneticAlgorithm {
 		
 		return -1;
 	}
-	public void randomizeSolution(int run, int[] inputs){
+	
+public void randomizeSolution(int run, int[] inputs){
+
 		solution[run][ inputs[0] ][ inputs[1] ][ inputs[2] ][ inputs[3] ] = random.nextInt(3);//sets a random output between 0 and 3 for that input set
 	}
+
+
 }
