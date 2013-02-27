@@ -244,7 +244,7 @@ public class MazeGame {
 		if(map[pX][pY] == Constants.MAP_WIN){
 			return false;
 		}else{
-			return true;
+			return true;//
 		}
 		
 	}
