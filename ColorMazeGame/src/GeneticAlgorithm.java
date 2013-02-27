@@ -3,9 +3,8 @@ import java.util.Random;
 
 public class GeneticAlgorithm {
 
-	public static int runs;						//is set in the initiation, transfered from mazeGame
-	public static int[][][][][] solution;		//solution[current run][up][down][left][right]
-	
+	public static int runs;
+	public static int[][][][][] solution;
 	public static int[] output;
 	public static int lastOutput;				//goes into solution[][][][][][lastOutput], and tracks the last move. Is set to -1 until the bot moves.
 	public Random random = new Random();		//the # in parenthesis is the seed for the random numbers
