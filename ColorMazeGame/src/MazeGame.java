@@ -238,7 +238,7 @@ public class MazeGame {
 			inputs[3] = 1;//3 = right
 		}
 	}
-	
+	//test
 	private static boolean continueRun(){
 		
 		if(map[pX][pY] == Constants.MAP_WIN){
