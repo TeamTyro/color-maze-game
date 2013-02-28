@@ -402,7 +402,7 @@ public class MazeGame {
 	
 	private static boolean sendData(InfoPackage d) {
 		String contentType = "text/xml";
-		String charset = "ISO-8859-1";
+		String charset = "UTF-8";
 		String request = null;
 		try {
 		    request = String.format("%s", URLEncoder.encode(xml.getXML(), charset));
@@ -424,8 +424,9 @@ public class MazeGame {
 		    connection.setDoOutput(true);
 		    connection.setRequestProperty("Accept-Charset", charset);
 		    connection.setRequestProperty("Content-Type", contentType);
+		    connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
 		    output = connection.getOutputStream();
-		    output.write(request.getBytes("ISO-8859-1"));
+		    output.write(request.getBytes("UTF-8"));
 		    if(output != null) {
 		    	try { output.close(); } catch (IOException e) {}
 		    }
