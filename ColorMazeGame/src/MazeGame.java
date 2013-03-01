@@ -21,6 +21,7 @@ import etc.Constants;
 import etc.MazeMap;
 
 public class MazeGame {
+	//			Pre-Genetic Algorithm Code				//
 	private static Random generator = new Random();
 	private static int[][] map;				// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
 	private static int [] recActions; 		// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]. CURRENTLY NOT USED, WILL IMPLEMENT WHEN IT IS THE FINAL RUN OF FINAL GENERATION.
@@ -29,12 +30,15 @@ public class MazeGame {
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.	
 	private static int pX, pY;				// Player x and y (within the map array)
 
-	public static int runs = 10;			//total runs
+	//			Variables that you can change			//
+	public static int runs = 				10;				//total runs
+	public static int generations = 		10;				//total generations
+	public static int frameSpeed = 			25;			//how many miliseconds per frame
+	public static int maxSolutionSize = 	500;//how long we will allow solutions to be.
+	
+	//			Non Changable Variables 				//
 	public static int run = 0;				//keeps track of the current run
-	public static int generations = 10;		//total generations
-	public static int generation = 0;		//keeps track of the current generation
-	public static int frameSpeed = 100;		//how many miliseconds per frame
-	public static int maxSolutionSize = 500;//how long we will allow solutions to be.
+	public static int generation =	0;		//keeps track of the current generation
 	public static int[] inputs = new int[4];//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
 	public static int[][] fitness;			//[run][aspect of run] records aspects of each run. [run][0=total moves, 1=how it won, 2=most repeated space] more documentation on ai.mutate() in class GA
 	public static int[][] mapCount;			//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
@@ -54,7 +58,7 @@ public class MazeGame {
 		
 		resetMap();		//sets map up.
 		
-		//printMaze(map);	//prints map on console
+		printMaze(map);	//prints map on console
 		
 		begin();
 	}
@@ -83,7 +87,8 @@ public class MazeGame {
 					
 				}else{					//if all runs are complete, run this code. It should switch to the next generation, and run a mutation algorithm in ai.
 					ai.mutate(fitness);	//sends fitness to the GA, which will do with it what it wants.
-								
+					run = 0;
+					generation++;
 				}
 			} 
 			Display.update();
