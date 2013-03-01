@@ -28,7 +28,7 @@ public class GeneticAlgorithm {
 		}
 	}
 	
-	/***
+	/*
 	 * must recieve the input set
 	 * 
 	 *  0 = empty block
@@ -44,7 +44,7 @@ public class GeneticAlgorithm {
 	 * 		1 = right
 	 * 		2 = down
 	 * 		3 = left
-	 **/	
+	 */	
 	public int getOutput(int run, int[] inputs){//returns a number between 0 and 3 for the solution set
 		
 		int out = solution[run][ inputs[0] ][ inputs[1] ][ inputs[2] ][ inputs[3] ];	//for readablity
@@ -60,6 +60,16 @@ public class GeneticAlgorithm {
 		return lastOutput;
 		
 	}
+
+	public void mutate(int[][] fitness){//higher fitness is worse.
+		int[] solutionFitness = new int[runs];	//makes an array to record the calculated total fitness of a run.
+		for(int runx = 0; runx < runs; runx++){
+			solutionFitness[runx] = fitness[runx][0];//more moves = higher fitness
+			
+			
+		}
+	}
+	
 	
 	public static int opposite(int direction){	//returns the opposite direction. If not valid, returns -1.
 		
@@ -73,11 +83,11 @@ public class GeneticAlgorithm {
 		
 		return -1;
 	}
-	
-public void randomizeSolution(int run, int[] inputs){
+
+	public void randomizeSolution(int run, int[] inputs){
 
 		solution[run][ inputs[0] ][ inputs[1] ][ inputs[2] ][ inputs[3] ] = random.nextInt(3);//sets a random output between 0 and 3 for that input set
 	}
-
+	
 
 }

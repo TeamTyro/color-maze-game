@@ -22,99 +22,78 @@ import etc.MazeMap;
 
 public class MazeGame {
 	private static Random generator = new Random();
-	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
-	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]. CURRENTLY NOT USED, WILL IMPLEMENT WHEN IT IS THE FINAL RUN OF FINAL GENERATION.
-	private static int currentAction; 	// Keeps track of which part of recActions your using. Basically just a counter for recActions
-	private static int rCurrentAction;	// Replay current action, just for replaying
+	private static int[][] map;				// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
+	private static int [] recActions; 		// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]. CURRENTLY NOT USED, WILL IMPLEMENT WHEN IT IS THE FINAL RUN OF FINAL GENERATION.
+	private static int moveCount; 			// Keeps track of which part of recActions your using. Basically just a counter for recActions
+	private static int rmoveCount;			// Replay current action, just for replaying
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.	
-	private static int pX, pY;			// Player x and y (within the map array)
+	private static int pX, pY;				// Player x and y (within the map array)
 
-	public static int[] inputs = new int[4];
-	//public static int[][] blockRepeat;//Counts how many times the player has been on each block of the map. This is used to prevent the bot getting into loops.
-	public static int runs = 10;
-	public static int[][] mapCount;//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
-	public static GeneticAlgorithm ai; //is set up in the begin method
+	public static int runs = 10;			//total runs
+	public static int run = 0;				//keeps track of the current run
+	public static int generations = 10;		//total generations
+	public static int generation = 0;		//keeps track of the current generation
+	public static int frameSpeed = 100;		//how many miliseconds per frame
+	public static int maxSolutionSize = 500;//how long we will allow solutions to be.
+	public static int[] inputs = new int[4];//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
+	public static int[][] fitness;			//[run][aspect of run] records aspects of each run. [run][0=total moves, 1=how it won, 2=most repeated space] more documentation on ai.mutate() in class GA
+	public static int[][] mapCount;			//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
+	public static GeneticAlgorithm ai; 		//is set up in the begin method
 	
-	/*
-	 * System.out.println("Enter something here : ");
-	 * 
-	 * */
 	
 	/* Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		
-		System.out.printf("Cheater's map:\n");
-		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];//sets array to map size
-		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];//sets array to map size
-		
+		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
+		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
+		fitness = new int[runs][3];
 		recActions = new int [500];
-		
 		startDate = new java.util.Date();
 		
-		resetMap();//sets map up.
-	
+		resetMap();		//sets map up.
+		
+		//printMaze(map);	//prints map on console
+		
 		begin();
 	}
 	
 	/* Function begin()
 	 * Sets up OpenGL and lwjgl and contains the main loop.
 	 */
-	private static void begin() {
-		
-		setUpScreen();
-		
+	private static void begin() {		
+		setUpScreen();		
 		ai = new GeneticAlgorithm(runs);
-		int run = 0;//will keep track of all the runs
 		
-		// Start main loop
-		while(!Display.isCloseRequested()) {
-			
+		while(!Display.isCloseRequested()) {	// Start main loop
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer
 			render();															// Rendering
 			
-				
-			// Testing in progress
-			if(continueRun()) {	//if you have not won yet
-					
+			if(continueRun()) {			//if you have not won yet
 				setInputs();
-				checkKeys(run);	//updates the inputs[] array to the current screen
-				System.out.print(mapCount[pX][pY]+" ");
-					
-				try {			//slows down the thread
-					Thread.sleep(200);
-				} catch(InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
+				checkKeys(run);			//updates the inputs[] array to the current screen
+				sleep(frameSpeed);		//stop screen for int framespeed miliseconds
 				
-			}else{				//Once the run has been won
+			}else{						//Once the run has been won	
+				if(run < runs){			//if you still have more runs to complete
+					recordFitness();	//records how fit the last run was (how good it did) used to send to the ai.mutate() algorithm.
+					run = run+1;		//move to the next run
+					resetMap();			//resets map for the next run.
 					
-				if(run < runs){	//if you still have more runs to complete
-					run = run++;//move to the next run
-					resetMap();	//resets map for the next run.
-				}else{
-								//if all runs are complete, run this code.
+				}else{					//if all runs are complete, run this code. It should switch to the next generation, and run a mutation algorithm in ai.
+					ai.mutate(fitness);	//sends fitness to the GA, which will do with it what it wants.
+								
 				}
-				/*
-				endDate = new java.util.Date();
-				if(sendData(packUp(startDate, endDate, recActions))) {
-					System.out.printf("Successfully sent the test data!\n");
-				} else {
-					System.out.printf("ERROR: Failure to send test data!\n");
-				}
-				*/
 			} 
 			Display.update();
-		}						//end of while loop, when display closes.
-		
+		}	//end of while loop, when display closes.
 		Display.destroy();
 	}
 	
 	private static void resetMap(){
 		
-		currentAction = 0;
+		moveCount = 0;
 		
 		MazeMap maze = new MazeMap();//loads map from text file
 		maze.loadMap("map1.txt");
@@ -130,13 +109,9 @@ public class MazeGame {
 			}
 		}
 		
-		printMaze(map);
-		
 	}
 	
-	/*Tool for reading lines from console
-	 * */
-	private static int readInfo(String prompt){
+	private static int readInfo(String prompt){		//Tool for reading lines from console
 		
 		//System.out.printf(prompt + "\n");//prompt
 		System.out.printf(prompt);//prompt
@@ -156,17 +131,13 @@ public class MazeGame {
 		return -10000;
 	}
 	
-	/* Function checkKeys()
-	 * Reads for key input and acts accordingly. More specifically,
-	 * the player is moved from arrow key presses.
-	 */
-	private static void checkKeys(int run) {
+	private static void checkKeys(int run) {		//Reads for key input and acts accordingly. Player is moved from arrow key presses.
 		
 		if( ai.getOutput(run, inputs) == 0 ) {//if output says go up
 			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {//checks if you can or can't move into that space
 				pY--;
-				//recActions[currentAction] = Constants.DIR_UP;
-				currentAction++;
+				//recActions[moveCount] = Constants.DIR_UP;
+				moveCount++;
 			}else{//if you couldn't move into that spot
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
@@ -174,8 +145,8 @@ public class MazeGame {
 		if( ai.getOutput(run, inputs) == 1 ) {//if output says go down
 			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
 				pY++;
-				//recActions[currentAction] = Constants.DIR_DOWN;
-				currentAction++;
+				//recActions[moveCount] = Constants.DIR_DOWN;
+				moveCount++;
 			}else{//if you couldn't move into that spot
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
@@ -183,8 +154,8 @@ public class MazeGame {
 		if( ai.getOutput(run, inputs) == 2 ) {//if output says go left
 			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
 				pX--;
-				//recActions[currentAction] = Constants.DIR_LEFT;
-				currentAction++;
+				//recActions[moveCount] = Constants.DIR_LEFT;
+				moveCount++;
 			}else{//if you couldn't move into that spot
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
@@ -192,8 +163,8 @@ public class MazeGame {
 		if( ai.getOutput(run, inputs) == 3 ) {//if output says go right
 			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
 				pX++;
-				//recActions[currentAction] = Constants.DIR_RIGHT;
-				currentAction++;
+				//recActions[moveCount] = Constants.DIR_RIGHT;
+				moveCount++;
 			}else{//if you couldn't move into that spot
 				ai.randomizeSolution(run,inputs);//if you're running into a wall, it randomizes the solution
 			}
@@ -213,7 +184,7 @@ public class MazeGame {
 		
 	}
 	
-	private static void setInputs(){//0 = open block, 1 = closed block
+	private static void setInputs(){				//0 = open block, 1 = closed block
 		
 		if(movePlayer(Constants.DIR_UP, pX, pY, map)){//if there is an open space above you
 			inputs[0] = 0;//0 = up
@@ -239,26 +210,71 @@ public class MazeGame {
 			inputs[3] = 1;//3 = right
 		}
 	}
-	//test
+
 	private static boolean continueRun(){
 		
 		if(map[pX][pY] == Constants.MAP_WIN){
+			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Won				"+"Total Moves: "+ moveCount);
 			return false;
+			
 		}
 		
 		if(stuckInLoop()){
+			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Got Stuck		"+"Total Moves: "+ moveCount);
+			return false;
+		}
+		
+		if(run >= runs){//if it is past the final run
+			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Last Run		"+"Total Moves: "+ moveCount);
+			return false;
+		}
+		
+		if(moveCount >= maxSolutionSize){
+			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Too many moves	"+"	Total Moves: "+ moveCount);
 			return false;
 		}
 		
 		return true;
 	}
 	
-	private static boolean stuckInLoop(){//returns true if the AI has passed the same block more than 10 times
+	private static boolean stuckInLoop(){			//returns true if the AI has passed the same block more than 10 times
 		if(mapCount[pX][pY] > 10){
 			return true;
 		}else{
 			return false;
 		}
+	}
+	
+	private static void sleep(int time){			//stops the frame for 'time' miliseconds. 
+		
+		try {			//slows down the thread
+			Thread.sleep(time);
+		} catch(InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+		
+	}
+	
+	private static void recordFitness(){			//records how fit the last run was (how good it did) used to send to the ai.mutate() algorithm.
+		//[][0] = total moves; [][1] = how the run ended; [][2] = what the most repeated space was.
+		fitness[run][0] = moveCount;
+			
+		if(map[pX][pY] == Constants.MAP_WIN){		//if the solution won the maze! :D
+			fitness[run][1] = 1;
+		}else{
+			fitness[run][1] = 0;					//if the solution did not win the maze
+		}
+		
+		int mostRepeatedBlock = 0;							//keeps track of the most traversed block.
+		for(int x=0; x<Constants.MAP_WIDTH; x++) {			//goes through each map block to find the most traversed block
+			for(int y=0; y<Constants.MAP_HEIGHT; y++) {		
+				if(mapCount[x][y] > mostRepeatedBlock){
+					 mostRepeatedBlock = mapCount[x][y];	//sets the new int for most repeats on a block
+					 
+				}
+			}
+		}
+		fitness[run][2] = mostRepeatedBlock;
 	}
 	
 	
