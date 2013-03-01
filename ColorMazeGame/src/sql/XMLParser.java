@@ -12,8 +12,8 @@ public class XMLParser {
 	
 	public XMLParser(InfoPackage pack) {
 		String x_0_s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-		String x_1_s = "<test>";
-		String x_1_e = "</test>";
+		String x_1_s = "<data>";
+		String x_1_e = "</data>";
 		String x_2_s = "<stime>";
 		String x_2_e = "</stime>";
 		String x_3_s = "<etime>";
