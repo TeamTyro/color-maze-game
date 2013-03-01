@@ -22,6 +22,7 @@ public class XMLParser {
 		String x_4_e = "</moves>";
 		
 		xml = "";
+		xml = xml.concat(x_0_s);
 		xml = xml.concat(x_1_s);
 		
 			xml = xml.concat(x_2_s);
