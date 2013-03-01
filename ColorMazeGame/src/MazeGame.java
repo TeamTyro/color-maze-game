@@ -412,15 +412,17 @@ public class MazeGame {
 		String contentType = "text/xml";
 		String charset = "UTF-8";
 		String request = null;
+		
 		try {
 		    request = String.format("%s", URLEncoder.encode(xml.getXML(), charset));
 		} catch (UnsupportedEncodingException e1) {
 		    e1.printStackTrace();
 		}
+		
 		URL url = null;
 		URLConnection connection = null;
-		OutputStream output = null;
-		InputStream response = null;
+		OutputStreamWriter output = null;
+		InputStreamReader response = null;
 		try {
 		    url = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
 		} catch (MalformedURLException e) {
@@ -430,17 +432,41 @@ public class MazeGame {
 		try {
 		    connection = url.openConnection();
 		    connection.setDoOutput(true);
+		    connection.setUseCaches(false);
+		    connection.setDefaultUseCaches(false);
 		    connection.setRequestProperty("Accept-Charset", charset);
 		    connection.setRequestProperty("Content-Type", contentType);
 		    connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
-		    output = connection.getOutputStream();
-		    output.write(request.getBytes("UTF-8"));
+		    
+		    output = new OutputStreamWriter(connection.getOutputStream());
+		    output.write(request);
 		    if(output != null) {
-		    	try { output.close(); } catch (IOException e) {}
+		    	try {
+		    		output.flush();
+		    		output.close();
+		    	} catch (IOException e) {
+		    		System.out.printf("ERROR: Could not close output connection!\n");
+		    	}
 		    }
-		    response = connection.getInputStream();
 		} catch (IOException e) {
 		    e.printStackTrace();
+		}
+		
+		try {
+			response = new InputStreamReader(connection.getInputStream());
+			StringBuilder buf = new StringBuilder();
+		    char[] cbuf = new char[ 2048 ];
+		    int num;
+		 
+		    while ( -1 != (num=response.read( cbuf )))
+		    {
+		        buf.append( cbuf, 0, num );
+		    }
+		 
+		    String result = buf.toString();
+		    System.err.println( "\nResponse from server after POST:\n" + result );
+		} catch(IOException e) {
+			e.printStackTrace();
 		}
 		
 		return true;
