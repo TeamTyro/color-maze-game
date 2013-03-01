@@ -389,6 +389,10 @@ public class MazeGame {
 		return false;
 	}
 	
+	/** Function packUp(java.util.Date sD, java.util.Date eD, int[] a)
+	 * "Packs" the starting date, ending date, and actions into an InfoPackage
+	 * object. Returns type InfoPackage.
+	 */
 	private static InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
 		InfoPackage out = new InfoPackage();
 		
@@ -400,6 +404,10 @@ public class MazeGame {
 		return out;
 	}
 	
+	/** Function sendData(InfoPackage d)
+	 * Sends the data in InfoPackage d to the database in the form of an
+	 * XML-standard string.
+	 */
 	private static boolean sendData(InfoPackage d) {
 		String contentType = "text/xml";
 		String charset = "UTF-8";
