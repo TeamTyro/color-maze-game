@@ -11,7 +11,7 @@ public class XMLParser {
 	}
 	
 	public XMLParser(InfoPackage pack) {
-		xml = "";
+		xml = "|";
 		xml = xml.concat(String.valueOf(pack.getDate(1)));
 		xml = xml.concat("|");
 		xml = xml.concat(String.valueOf(pack.getDate(2)));
