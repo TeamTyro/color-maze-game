@@ -1,6 +1,5 @@
 package sql;
 
-import java.util.*;
 import etc.Constants;
 
 public class InfoPackage {
