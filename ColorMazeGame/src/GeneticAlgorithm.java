@@ -6,10 +6,11 @@ public class GeneticAlgorithm {
 	public static int runs;
 	public static int[][][][][] solution;
 	public static int[] output;
-	public static int lastOutput;				//goes into solution[][][][][][lastOutput], and tracks the last move. Is set to -1 until the bot moves.
-	public Random random = new Random();		//the # in parenthesis is the seed for the random numbers
+	public static int lastOutput;					//goes into solution[][][][][][lastOutput], and tracks the last move. Is set to -1 until the bot moves.
+	public int[] runFitness;	//gets the fitness for all the runs. [runs]
+	public Random random = new Random();			//the # in parenthesis is the seed for the random numbers
 	
-	public GeneticAlgorithm(int runsCount){		//sets up runs and the input array
+	public GeneticAlgorithm(int runsCount){			//sets up runs and the input array
 		
 		runs = runsCount;
 		solution = new int[runs][2][2][2][2];
@@ -26,6 +27,8 @@ public class GeneticAlgorithm {
 				}
 			}
 		}
+		
+		runFitness = new int[runs];	//gets the fitness for all the runs. [runs]
 	}
 	
 	/*
@@ -61,41 +64,46 @@ public class GeneticAlgorithm {
 		
 	}
 
-	public void mutate(int[][] fitness){			//higher fitness is worse.
-		int[] runFitness = getFitness(fitness);		//gets the fitness for all the runs.
+	public void mutate(){			//higher fitness is worse.
 		int[] topX = new int[3];					//HOLDS THE RUN NUMBER of the top [x] solutions. 0 is the highest fitness run, x is the lowest fitness run.
-		for(int i = 0; i < topX.length; i++){topX[i] = -1;}	//sets all of topX to -1
+		for(int i = 0; i < topX.length; i++){topX[i] = runs-1;}	//sets all of topX to -1
+		
 		for(int run = 0; run < runs; run++){		//Finds the topx solutions.
 			
-			for(int i = 0; i < topX.length; i++){	//goes through topX array, to see if the current run was more fit than the currently scanned runs in topX
-				if(runFitness[run] < runFitness[topX[i]]){
-					topX[i] = run;
+			for(int i = 0; i < topX.length; i++){			//goes through topX array, to see if the current run was more fit than the currently scanned runs in topX
+				if(runFitness[run] < runFitness[topX[i]]){	//if there is a new record for the i'th place, then set it.
+					
+					if(i < topX.length-1){		//if it is still greater than one of the top 3
+						topX[i+1] = topX[i];	//moves the top variable up one, to make space for the new one.
+					}
+					
+					topX[i] = run;				//sets the new topX
+					break;
 				}
 			}
 			
 			
 			
 			
-			
 		}
+		System.out.print("1st: "+runFitness[topX[0]]+" Run: "+topX[0]);
+		System.out.print("		2nd: "+runFitness[topX[1]]+" Run: "+topX[1]);
+		System.out.println("		3rd: "+runFitness[topX[2]]+"Run: "+topX[2]);
+
 	}
 	
-	public int[] getFitness(int[][] fitness){	//returns an array[runs] that has the fitness for each run.
+	public void getFitness(int[] fitness, int run){	//returns an array[runs] that has the fitness for each run.
 		int movePunishment = 		1;			//punishment for amount of moves. movePunishment*moveCount = total punishment.
 		int lossPunishment = 		100;		//punishment for not completing the maze.
 		int repeatPunishment = 		2;			//punishment for going over the same square more than once. repeatPunishment*repeats = total punishment
-		int[] runFitness = new int[runs];		//makes an array to record the calculated total fitness of a run.
-		
-		for(int run = 0; run < runs; run++){	//individually sets each runFitness. This is the main block of code.
+			//individually sets each runFitness. This is the main block of code.
 			
-			runFitness[run] += fitness[run][0]*movePunishment;	//		Calculates the punishment for moving	//
-			if(fitness[run][1] == 0){							//		Calculates the punishment for losing	//	
-				runFitness[run] += lossPunishment;
-			}//May consider an ELSE, that will deduct punishment for winning... Will tweak later.
-			runFitness[run] += fitness[run][0]*repeatPunishment;//		Calculates the punishment for repeats	//
-					
-		}
-		return runFitness;
+		runFitness[run] += fitness[0]*movePunishment;	//		Calculates the punishment for moving	//
+		if(fitness[1] == 0){							//		Calculates the punishment for losing	//	
+			runFitness[run] += lossPunishment;
+		}//May consider an ELSE, that will deduct punishment for winning... Will tweak later.
+		runFitness[run] += fitness[0]*repeatPunishment;//		Calculates the punishment for repeats	//
+
 	}
 	
 	public static int opposite(int direction){	//returns the opposite direction. If not valid, returns -1.

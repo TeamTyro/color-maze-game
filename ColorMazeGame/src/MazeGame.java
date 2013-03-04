@@ -33,14 +33,15 @@ public class MazeGame {
 	//			Variables that you can change			//
 	public static int runs = 				10;				//total runs
 	public static int generations = 		10;				//total generations
-	public static int frameSpeed = 			25;			//how many miliseconds per frame
+	public static int frameSpeed = 			0;			//how many miliseconds per frame
 	public static int maxSolutionSize = 	500;//how long we will allow solutions to be.
+	public static int maxRepeatsonBlock =	10;//the max amount of time an AI is allowed to repeat on a block, before it quits out.
 	
 	//			Non Changable Variables 				//
 	public static int run = 0;				//keeps track of the current run
 	public static int generation =	0;		//keeps track of the current generation
 	public static int[] inputs = new int[4];//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
-	public static int[][] fitness;			//[run][aspect of run] records aspects of each run. [run][0=total moves, 1=how it won, 2=most repeated space] more documentation on ai.mutate() in class GA
+	public static int[] fitness;			//[run][aspect of run] records aspects of each run. [run][0=total moves, 1=how it won, 2=most repeated space] more documentation on ai.mutate() in class GA
 	public static int[][] mapCount;			//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
 	public static GeneticAlgorithm ai; 		//is set up in the begin method
 	
@@ -52,7 +53,7 @@ public class MazeGame {
 	public static void main(String args[]) {
 		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
 		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
-		fitness = new int[runs][3];
+		fitness = new int[3];
 		recActions = new int [500];
 		startDate = new java.util.Date();
 		
@@ -74,7 +75,7 @@ public class MazeGame {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer
 			render();															// Rendering
 			
-			if(continueRun()) {			//if you have not won yet
+			if(run < runs && continueRun()) {			//if you have not won yet
 				setInputs();
 				checkKeys(run);			//updates the inputs[] array to the current screen
 				sleep(frameSpeed);		//stop screen for int framespeed miliseconds
@@ -82,12 +83,15 @@ public class MazeGame {
 			}else{						//Once the run has been won	
 				if(run < runs){			//if you still have more runs to complete
 					recordFitness();	//records how fit the last run was (how good it did) used to send to the ai.mutate() algorithm.
+					ai.getFitness(fitness, run);	//sends ai the recently recorded fitness.
+					System.out.println("Fitness: "+ai.runFitness[run]);
 					run = run+1;		//move to the next run
 					resetMap();			//resets map for the next run.
 					
 				}else{					//if all runs are complete, run this code. It should switch to the next generation, and run a mutation algorithm in ai.
-					ai.mutate(fitness);	//sends fitness to the GA, which will do with it what it wants.
+					ai.mutate();	//sends fitness to the GA, which will do with it what it wants.
 					run = 0;
+					resetMap();			//resets map for the next run.
 					generation++;
 				}
 			} 
@@ -112,8 +116,7 @@ public class MazeGame {
 					pY = y;
 				}
 			}
-		}
-		
+		}	
 	}
 	
 	private static int readInfo(String prompt){		//Tool for reading lines from console
@@ -219,23 +222,20 @@ public class MazeGame {
 	private static boolean continueRun(){
 		
 		if(map[pX][pY] == Constants.MAP_WIN){
-			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Won				"+"Total Moves: "+ moveCount);
+			System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: Won		"+" Total Moves: "+ moveCount+" ");
 			return false;
 			
 		}
 		
 		if(stuckInLoop()){
-			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Got Stuck		"+"Total Moves: "+ moveCount);
+			System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: Stuck	"+" Total Moves: "+ moveCount+" ");
 			return false;
 		}
 		
-		if(run >= runs){//if it is past the final run
-			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Last Run		"+"Total Moves: "+ moveCount);
-			return false;
-		}
+
 		
 		if(moveCount >= maxSolutionSize){
-			System.out.println("RUN: "+run+"	Generation: "+generation+"	Reason: Too many moves	"+"	Total Moves: "+ moveCount);
+			System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: MaxMoves"+" Total Moves: "+ moveCount+" ");
 			return false;
 		}
 		
@@ -243,7 +243,7 @@ public class MazeGame {
 	}
 	
 	private static boolean stuckInLoop(){			//returns true if the AI has passed the same block more than 10 times
-		if(mapCount[pX][pY] > 10){
+		if(mapCount[pX][pY] > maxRepeatsonBlock){
 			return true;
 		}else{
 			return false;
@@ -262,12 +262,12 @@ public class MazeGame {
 	
 	private static void recordFitness(){			//records how fit the last run was (how good it did) used to send to the ai.mutate() algorithm.
 		//[][0] = total moves; [][1] = how the run ended; [][2] = what the most repeated space was.
-		fitness[run][0] = moveCount;
+		fitness[0] = moveCount;
 			
 		if(map[pX][pY] == Constants.MAP_WIN){		//if the solution won the maze! :D
-			fitness[run][1] = 1;
+			fitness[1] = 1;
 		}else{
-			fitness[run][1] = 0;					//if the solution did not win the maze
+			fitness[1] = 0;					//if the solution did not win the maze
 		}
 		
 		int mostRepeatedBlock = 0;							//keeps track of the most traversed block.
@@ -279,7 +279,7 @@ public class MazeGame {
 				}
 			}
 		}
-		fitness[run][2] = mostRepeatedBlock;
+		fitness[2] = mostRepeatedBlock;
 	}
 	
 	
