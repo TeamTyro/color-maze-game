@@ -5,6 +5,7 @@
  * "Color Maze Game."
  */
 
+import java.applet.Applet;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -28,7 +29,7 @@ import threads.SendData;
 import etc.Constants;
 import etc.MazeMap;
 
-public class MazeGame {
+public class MazeGame extends Applet {
 	private static Random generator = new Random();
 	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
 	
@@ -41,15 +42,24 @@ public class MazeGame {
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
 	private static int pX, pY;			// Player x and y (within the map array)
-
+	
+	/** Constructor MazeGame()
+	 * Initialize variables, etc.
+	 */
+	public MazeGame() {
+		
+	}
+	
+	public void start() {
+		
+	}
+	
 	/** Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		System.out.printf("Cheater's map:\n");
 		map = makeMaze();
-		printMaze(map);
 		
 		pX = Constants.MAP_WIDTH/2;
 		pY = 0;
