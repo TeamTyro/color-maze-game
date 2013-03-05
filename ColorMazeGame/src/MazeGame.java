@@ -14,7 +14,9 @@ import org.lwjgl.opengl.GL11;
 import java.net.*;
 import java.io.*;
 import sql.InfoPackage;
+import sql.DataParser;
 import etc.Constants;
+import etc.MazeMap;
 
 public class MazeGame {
 	private static Random generator = new Random();
@@ -25,6 +27,7 @@ public class MazeGame {
 	private static int rCurrentAction;	// Replay current action, just for replaying
 	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
+	private static DataParser dbInfo;		// Parser object that will contain the data in a readable format
 	
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
@@ -415,7 +418,7 @@ public class MazeGame {
 		out.setDates(sD, eD);
 		out.setActions(a);
 		
-		xml = new DataParser(out);
+		dbInfo = new DataParser(out);
 		
 		return out;
 	}
@@ -429,7 +432,7 @@ public class MazeGame {
 		String charset = "UTF-8";
 		String request = null;
 		
-		request = xml.getXML();
+		request = dbInfo.getXML();
 		
 		URL url = null;
 		URLConnection connection = null;
