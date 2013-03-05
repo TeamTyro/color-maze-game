@@ -6,6 +6,9 @@
  */
 
 import java.util.*;
+import javax.sound.sampled.*;
+import java.net.*;
+import java.io.*;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -102,6 +105,7 @@ public class MazeGame {
 					SendData sender = new SendData(packUp(startDate, endDate, recActions));
 					(new Thread(sender)).start();
 					
+					playMusic();
 					operation = 2;
 				}
 			} else if(operation == 1) {
@@ -140,6 +144,22 @@ public class MazeGame {
 		} catch(InterruptedException ex) {
 		    Thread.currentThread().interrupt();
 		}
+	}
+	
+	private static void playMusic() {
+		Clip clip;
+		File soundFile = new File("successSmall.wav");
+		
+		try {
+			AudioInputStream stream = AudioSystem.getAudioInputStream(soundFile);
+			AudioFormat format = stream.getFormat();
+			DataLine.Info info = new DataLine.Info(Clip.class, format);
+			clip = (Clip) AudioSystem.getLine(info);
+			clip.open(stream);
+		    clip.start();
+		} catch (IOException ex) {
+		} catch (UnsupportedAudioFileException ex) {
+		} catch (LineUnavailableException ex) { }
 	}
 	
 	/** Function render()
