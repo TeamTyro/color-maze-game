@@ -31,11 +31,11 @@ public class MazeGame {
 	private static int pX, pY;				// Player x and y (within the map array)
 
 	//			Variables that you can change			//
-	public static int runs = 				10;				//total runs
-	public static int generations = 		10;				//total generations
+	public static int runs = 				10;			//total runs
+	public static int generations = 		10;			//total generations
 	public static int frameSpeed = 			0;			//how many miliseconds per frame
-	public static int maxSolutionSize = 	500;//how long we will allow solutions to be.
-	public static int maxRepeatsonBlock =	10;//the max amount of time an AI is allowed to repeat on a block, before it quits out.
+	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
+	public static int maxRepeatsonBlock =	10;			//the max amount of time an AI is allowed to repeat on a block, before it quits out.
 	
 	//			Non Changable Variables 				//
 	public static int run = 0;				//keeps track of the current run
@@ -75,7 +75,7 @@ public class MazeGame {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer
 			render();															// Rendering
 			
-			if(run < runs && continueRun()) {			//if you have not won yet
+			if(run < runs && continueRun()) {	//if you have not won yet
 				setInputs();
 				checkKeys(run);			//updates the inputs[] array to the current screen
 				sleep(frameSpeed);		//stop screen for int framespeed miliseconds
@@ -88,8 +88,8 @@ public class MazeGame {
 					run = run+1;		//move to the next run
 					resetMap();			//resets map for the next run.
 					
-				}else{					//if all runs are complete, run this code. It should switch to the next generation, and run a mutation algorithm in ai.
-					ai.mutate();	//sends fitness to the GA, which will do with it what it wants.
+				}else{					//if you have won and all runs are complete. Resets and mutates solution sets for the next generation. 
+					ai.mutate();		//sends fitness to the GA, which will do with it what it wants.
 					run = 0;
 					resetMap();			//resets map for the next run.
 					generation++;
@@ -103,7 +103,7 @@ public class MazeGame {
 	private static void resetMap(){
 		
 		moveCount = 0;
-		
+		ai.lastOutput = -1;
 		MazeMap maze = new MazeMap();//loads map from text file
 		maze.loadMap("map1.txt");
 		
@@ -280,6 +280,7 @@ public class MazeGame {
 			}
 		}
 		fitness[2] = mostRepeatedBlock;
+		//System.out.println("moveCount: "+fitness[0]+"	Win or not: "+fitness[1]+"	Most repeated block: "+fitness[2]+" ");
 	}
 	
 	

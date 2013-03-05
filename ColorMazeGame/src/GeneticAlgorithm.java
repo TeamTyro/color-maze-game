@@ -7,7 +7,7 @@ public class GeneticAlgorithm {
 	public static int[][][][][] solution;
 	public static int[] output;
 	public static int lastOutput;					//goes into solution[][][][][][lastOutput], and tracks the last move. Is set to -1 until the bot moves.
-	public int[] runFitness;	//gets the fitness for all the runs. [runs]
+	public static int[] runFitness;	//gets the fitness for all the runs. [runs]
 	public Random random = new Random();			//the # in parenthesis is the seed for the random numbers
 	
 	public GeneticAlgorithm(int runsCount){			//sets up runs and the input array
@@ -53,7 +53,7 @@ public class GeneticAlgorithm {
 		int out = solution[run][ inputs[0] ][ inputs[1] ][ inputs[2] ][ inputs[3] ];	//for readablity
 		
 		//if there is no solution for that reaction do the following
-		if(out == -1 || out == opposite(lastOutput)){
+		if(out == -1){//|| out == opposite(lastOutput
 			
 			randomizeSolution(run,inputs);		//randomizes that solution
 			out = solution[run][ inputs[0] ][ inputs[1] ][ inputs[2] ][ inputs[3] ];	//sets out once again
@@ -66,43 +66,68 @@ public class GeneticAlgorithm {
 
 	public void mutate(){			//higher fitness is worse.
 		int[] topX = new int[3];					//HOLDS THE RUN NUMBER of the top [x] solutions. 0 is the highest fitness run, x is the lowest fitness run.
-		for(int i = 0; i < topX.length; i++){topX[i] = runs-1;}	//sets all of topX to -1
+		for(int i = 0; i < topX.length; i++){topX[i] = -1;}	//sets all of topX to -1
 		
 		for(int run = 0; run < runs; run++){		//Finds the topx solutions.
-			
 			for(int i = 0; i < topX.length; i++){			//goes through topX array, to see if the current run was more fit than the currently scanned runs in topX
-				if(runFitness[run] < runFitness[topX[i]]){	//if there is a new record for the i'th place, then set it.
-					
+				if(topX[i] == -1 || runFitness[run] < runFitness[topX[i]]){	//if there is a new record for the i'th place, then set it.					
 					if(i < topX.length-1){		//if it is still greater than one of the top 3
 						topX[i+1] = topX[i];	//moves the top variable up one, to make space for the new one.
 					}
-					
 					topX[i] = run;				//sets the new topX
 					break;
 				}
-			}
-			
-			
-			
-			
+			}	
 		}
-		System.out.print("1st: "+runFitness[topX[0]]+" Run: "+topX[0]);
+		System.out.print("1st: "+runFitness[topX[0]]+" Run: "+topX[0]);				//Prints the top fitness's of the generation, for debugging.
 		System.out.print("		2nd: "+runFitness[topX[1]]+" Run: "+topX[1]);
 		System.out.println("		3rd: "+runFitness[topX[2]]+"Run: "+topX[2]);
-
+		
+		int[][][][][] solutionPlaceholder = new int[runs][2][2][2][2];			//For holding the newly mutated sets until they are ready to be put into solution[][][][][]
+		for(int runx = 0; runx < runs; runx++){
+			solutionPlaceholder[runx] = solution[topX[0]];//Goes through each run for all mutating operations.=
+			for(int in1 = 0; in1 < 2; in1++){									// format: solution[runx][in1][in2][in3][in4]. Same format for solutionPlaceholde				
+				for(int in2 = 0; in2 < 2; in2++){					
+					for(int in3 = 0; in3 < 2; in3++){					
+						for(int in4 = 0; in4 < 2; in4++){
+							
+							int r = random.nextInt(	5);
+							if(r == 0){
+								solutionPlaceholder[runx][in1][in2][in3][in4] = random.nextInt(3);
+							}
+							/*for(int best = topX.length-1; best >= 0; best--){	//for 3 times. 0 is the best, 2 is the worst. Mutations are implemented on a 1/2^best basis, #1 being used 50% of the time, #2 25%, #3 12.5%
+								int r = random.nextInt(	best+1);
+								if(r == 1){
+									solutionPlaceholder[runx][in1][in2][in3][in4] = solution[topX[best]][in1][in2][in3][in4];
+									break;
+								}
+								if(r == best+1){
+									solutionPlaceholder[runx][in1][in2][in3][in4] = random.nextInt(3);
+									break;
+								}
+							}	
+							*/
+							
+							
+						}					
+					}
+				}				
+			}			
+		}
+		solution = solutionPlaceholder;
 	}
 	
 	public void getFitness(int[] fitness, int run){	//returns an array[runs] that has the fitness for each run.
-		int movePunishment = 		1;			//punishment for amount of moves. movePunishment*moveCount = total punishment.
+		int movePunishment = 		-10;			//punishment for amount of moves. movePunishment*moveCount = total punishment.
 		int lossPunishment = 		100;		//punishment for not completing the maze.
-		int repeatPunishment = 		2;			//punishment for going over the same square more than once. repeatPunishment*repeats = total punishment
+		int repeatPunishment = 		10;			//punishment for going over the same square more than once. repeatPunishment*repeats = total punishment
 			//individually sets each runFitness. This is the main block of code.
-			
+		runFitness[run] = 0;					//Resets from previous runfitness's in other generations.	
 		runFitness[run] += fitness[0]*movePunishment;	//		Calculates the punishment for moving	//
 		if(fitness[1] == 0){							//		Calculates the punishment for losing	//	
 			runFitness[run] += lossPunishment;
 		}//May consider an ELSE, that will deduct punishment for winning... Will tweak later.
-		runFitness[run] += fitness[0]*repeatPunishment;//		Calculates the punishment for repeats	//
+		runFitness[run] += fitness[2]*repeatPunishment;//		Calculates the punishment for repeats	//
 
 	}
 	
@@ -119,6 +144,7 @@ public class GeneticAlgorithm {
 		return -1;
 	}
 
+	
 	public void randomizeSolution(int run, int[] inputs){
 
 		solution[run][ inputs[0] ][ inputs[1] ][ inputs[2] ][ inputs[3] ] = random.nextInt(3);//sets a random output between 0 and 3 for that input set
