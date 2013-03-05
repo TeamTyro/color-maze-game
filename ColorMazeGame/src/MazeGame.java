@@ -15,23 +15,20 @@ import java.net.*;
 import java.io.*;
 import sql.InfoPackage;
 import etc.Constants;
-import sql.DataParser;
 
 public class MazeGame {
 	private static Random generator = new Random();
-	private static int[][] map;	// Universal map array
+	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
 	
-	private static int [] recActions;
-	private static int currentAction;
-	private static int rCurrentAction;
-	private static int operation;
-	private static java.util.Date startDate, endDate;
+	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]
+	private static int currentAction; 	// Keeps track of which part of recActions your using. Basically just a counter for recActions
+	private static int rCurrentAction;	// Replay current action, just for replaying
+	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
+	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
 	
-	private static DataParser xml;
+	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
-	private static boolean [] keyRefresh;
-	
-	private static int pX, pY;	// Player x and y (within the map array)
+	private static int pX, pY;			// Player x and y (within the map array)
 
 	/** Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
@@ -53,6 +50,21 @@ public class MazeGame {
 		
 		startDate = new java.util.Date();
 		
+		MazeMap maze = new MazeMap();
+		maze.loadMap("map2.txt");
+		
+		for(int x=0; x<Constants.MAP_WIDTH; x++) {
+			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
+				map[x][y] = maze.getSpace(x,y);
+				if(map[x][y] == Constants.MAP_START) {
+					pX = x;
+					pY = y;
+				}
+			}
+		}
+		
+		printMaze(map);
+	
 		begin();
 	}
 	
@@ -271,6 +283,9 @@ public class MazeGame {
 		case Constants.MAP_WIN:
 			GL11.glColor3f(0,1,0);
 			break;
+		case Constants.MAP_START:
+			GL11.glColor3f(1,1,0);
+			break;
 		}
 	}
 	
@@ -389,9 +404,10 @@ public class MazeGame {
 		return false;
 	}
 	
-	/** Function packUp(java.util.Date sD, java.util.Date eD, int[] a)
-	 * "Packs" the starting date, ending date, and actions into an InfoPackage
-	 * object. Returns type InfoPackage.
+	/** Method InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a)
+	 * sD startDate
+	 * eD endDate
+	 * a=recActions*
 	 */
 	private static InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
 		InfoPackage out = new InfoPackage();
