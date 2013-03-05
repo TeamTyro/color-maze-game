@@ -3,14 +3,14 @@ package sql;
 import sql.InfoPackage;
 import etc.Constants;
 
-public class XMLParser {
+public class DataParser {
 	private static String xml;
 	
-	public XMLParser() {
+	public DataParser() {
 		
 	}
 	
-	public XMLParser(InfoPackage pack) {
+	public DataParser(InfoPackage pack) {
 		xml = "|";
 		xml = xml.concat(String.valueOf(pack.getDate(1)));
 		xml = xml.concat("|");

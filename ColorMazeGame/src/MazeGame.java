@@ -15,7 +15,7 @@ import java.net.*;
 import java.io.*;
 import sql.InfoPackage;
 import etc.Constants;
-import sql.XMLParser;
+import sql.DataParser;
 
 public class MazeGame {
 	private static Random generator = new Random();
@@ -27,7 +27,7 @@ public class MazeGame {
 	private static int operation;
 	private static java.util.Date startDate, endDate;
 	
-	private static XMLParser xml;
+	private static DataParser xml;
 	
 	private static boolean [] keyRefresh;
 	
@@ -399,7 +399,7 @@ public class MazeGame {
 		out.setDates(sD, eD);
 		out.setActions(a);
 		
-		xml = new XMLParser(out);
+		xml = new DataParser(out);
 		
 		return out;
 	}
@@ -419,12 +419,15 @@ public class MazeGame {
 		URLConnection connection = null;
 		OutputStreamWriter output = null;
 		InputStreamReader response = null;
+		
+		// Make URL to receiving PHP file
 		try {
 		    url = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
 		} catch (MalformedURLException e) {
 		    e.printStackTrace();
 		}
 
+		// Set properties and send data
 		try {
 		    connection = url.openConnection();
 		    connection.setDoOutput(true);
@@ -448,6 +451,7 @@ public class MazeGame {
 		    e.printStackTrace();
 		}
 		
+		// Get server response
 		try {
 			response = new InputStreamReader(connection.getInputStream());
 			StringBuilder buf = new StringBuilder();
