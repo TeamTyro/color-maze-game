@@ -11,12 +11,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import java.net.*;
-import java.io.*;
 import sql.InfoPackage;
-import sql.DataParser;
 import etc.Constants;
 import etc.MazeMap;
+import threads.SendData;
 
 public class MazeGame {
 	private static Random generator = new Random();
@@ -27,8 +25,7 @@ public class MazeGame {
 	private static int rCurrentAction;	// Replay current action, just for replaying
 	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
-	private static DataParser dbInfo;		// Parser object that will contain the data in a readable format
-	
+		
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
 	private static int pX, pY;			// Player x and y (within the map array)
@@ -102,11 +99,8 @@ public class MazeGame {
 				checkKeys();
 				if(map[pX][pY] == Constants.MAP_WIN) {
 					endDate = new java.util.Date();
-					if(sendData(packUp(startDate, endDate, recActions))) {
-						System.out.printf("Successfully sent the test data!\n");
-					} else {
-						System.out.printf("ERROR: Failure to send test data!\n");
-					}
+					SendData sender = new SendData(packUp(startDate, endDate, recActions));
+					(new Thread(sender)).start();
 					
 					operation = 2;
 				}
@@ -418,8 +412,6 @@ public class MazeGame {
 		out.setDates(sD, eD);
 		out.setActions(a);
 		
-		dbInfo = new DataParser(out);
-		
 		return out;
 	}
 	
@@ -427,69 +419,7 @@ public class MazeGame {
 	 * Sends the data in InfoPackage d to the database in the form of an
 	 * XML-standard string.
 	 */
-	private static boolean sendData(InfoPackage d) {
-		String contentType = "text/xml";
-		String charset = "UTF-8";
-		String request = null;
-		
-		request = dbInfo.getXML();
-		
-		URL url = null;
-		URLConnection connection = null;
-		OutputStreamWriter output = null;
-		InputStreamReader response = null;
-		
-		// Make URL to receiving PHP file
-		try {
-		    url = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
-		} catch (MalformedURLException e) {
-		    e.printStackTrace();
-		}
 
-		// Set properties and send data
-		try {
-		    connection = url.openConnection();
-		    connection.setDoOutput(true);
-		    connection.setUseCaches(false);
-		    connection.setDefaultUseCaches(false);
-		    connection.setRequestProperty("Accept-Charset", charset);
-		    connection.setRequestProperty("Content-Type", contentType);
-		    connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
-		    
-		    output = new OutputStreamWriter(connection.getOutputStream());
-		    output.write(request);
-		    if(output != null) {
-		    	try {
-		    		output.flush();
-		    		output.close();
-		    	} catch (IOException e) {
-		    		System.out.printf("ERROR: Could not close output connection!\n");
-		    	}
-		    }
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}
-		
-		// Get server response
-		try {
-			response = new InputStreamReader(connection.getInputStream());
-			StringBuilder buf = new StringBuilder();
-		    char[] cbuf = new char[ 2048 ];
-		    int num;
-		 
-		    while ( -1 != (num=response.read( cbuf )))
-		    {
-		        buf.append( cbuf, 0, num );
-		    }
-		 
-		    String result = buf.toString();
-		    System.err.println( "\nResponse from server after POST:\n" + result );
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-		
-		return true;
-	}
 	
 	/** Function makeMaze()
 	 * Randomly creates a maze by drawing lines of a random

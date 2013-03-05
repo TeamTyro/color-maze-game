@@ -4,42 +4,42 @@ import sql.InfoPackage;
 import etc.Constants;
 
 public class DataParser {
-	private static String xml;
+	private static String data;
 	
 	public DataParser() {
 		
 	}
 	
 	public DataParser(InfoPackage pack) {
-		xml = "|";
-		xml = xml.concat(String.valueOf(pack.getDate(1)));
-		xml = xml.concat("|");
-		xml = xml.concat(String.valueOf(pack.getDate(2)));
-		xml = xml.concat("|");
+		data = "|";
+		data = data.concat(String.valueOf(pack.getDate(1)));
+		data = data.concat("|");
+		data = data.concat(String.valueOf(pack.getDate(2)));
+		data = data.concat("|");
 		int [] actions = pack.getActions();
 		int index = 0;
 		while(actions[index] != 0 && index < 500) {
 			switch(actions[index]) {
 			case Constants.DIR_LEFT:
-				xml = xml.concat("l");
+				data = data.concat("l");
 				break;
 			case Constants.DIR_RIGHT:
-				xml = xml.concat("r");
+				data = data.concat("r");
 				break;
 			case Constants.DIR_UP:
-				xml = xml.concat("u");
+				data = data.concat("u");
 				break;
 			case Constants.DIR_DOWN:
-				xml = xml.concat("d");
+				data = data.concat("d");
 				break;
 			}
 			index++;
 		}
 		
-		xml = xml.concat("|");
+		data = data.concat("|");
 	}
 	
-	public String getXML() {
-		return xml;
+	public String getData() {
+		return data;
 	}
 }
