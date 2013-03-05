@@ -148,7 +148,7 @@ public class MazeGame {
 	
 	private static void playMusic() {
 		Clip clip;
-		File soundFile = new File("successSmall.wav");
+		File soundFile = new File("fanfare.wav");
 		
 		try {
 			AudioInputStream stream = AudioSystem.getAudioInputStream(soundFile);
