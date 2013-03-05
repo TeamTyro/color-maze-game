@@ -5,19 +5,28 @@
  * "Color Maze Game."
  */
 
-import java.util.*;
-import javax.sound.sampled.*;
-import java.net.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+
 import sql.InfoPackage;
+import threads.SendData;
 import etc.Constants;
 import etc.MazeMap;
-import threads.SendData;
 
 public class MazeGame {
 	private static Random generator = new Random();
