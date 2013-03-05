@@ -413,11 +413,7 @@ public class MazeGame {
 		String charset = "UTF-8";
 		String request = null;
 		
-		try {
-		    request = String.format("%s", URLEncoder.encode(xml.getXML(), charset));
-		} catch (UnsupportedEncodingException e1) {
-		    e1.printStackTrace();
-		}
+		request = xml.getXML();
 		
 		URL url = null;
 		URLConnection connection = null;
