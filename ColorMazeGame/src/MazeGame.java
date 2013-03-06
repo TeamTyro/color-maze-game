@@ -43,6 +43,10 @@ public class MazeGame extends Applet {
 	
 	private static int pX, pY;			// Player x and y (within the map array)
 	
+	private static Clip clip;
+	private static File soundFile;
+	private static AudioInputStream stream;
+	
 	/** Constructor MazeGame()
 	 * Initialize variables, etc.
 	 */
@@ -73,7 +77,7 @@ public class MazeGame extends Applet {
 		startDate = new java.util.Date();
 		
 		MazeMap maze = new MazeMap();
-		maze.loadMap("map2.txt");
+		maze.loadMap("res/map2.txt");
 		
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
@@ -136,7 +140,7 @@ public class MazeGame extends Applet {
 			} else if(operation == 2) {
 				// Test is over
 			}
-			
+
 			Display.update();
 		}
 		
@@ -167,18 +171,22 @@ public class MazeGame extends Applet {
 	
 	private static void playMusic() {
 		Clip clip;
-		File soundFile = new File("fanfare.wav");
+		File soundFile = new File("res/fanfare.wav");
 		
 		try {
-			AudioInputStream stream = AudioSystem.getAudioInputStream(soundFile);
+			stream = AudioSystem.getAudioInputStream(soundFile);
 			AudioFormat format = stream.getFormat();
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
 			clip = (Clip) AudioSystem.getLine(info);
 			clip.open(stream);
-		    clip.start();
+			clip.start();
 		} catch (IOException ex) {
+			System.out.printf("ERROR: Audio IO Exception!\n");
 		} catch (UnsupportedAudioFileException ex) {
-		} catch (LineUnavailableException ex) { }
+			System.out.printf("ERROR: Audio Unsupported Exception!\n");
+		} catch (LineUnavailableException ex) {
+			System.out.printf("ERROR: Audio Line Exception!\n");
+		}
 	}
 	
 	/** Function render()
