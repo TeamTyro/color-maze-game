@@ -51,7 +51,35 @@ public class MazeGame extends Applet {
 	}
 	
 	public void start() {
+		map = makeMaze();
 		
+		pX = Constants.MAP_WIDTH/2;
+		pY = 0;
+		keyRefresh = new boolean [6];
+		
+		recActions = new int [500];
+		operation = 0;
+		
+		currentAction = 0;
+		
+		startDate = new java.util.Date();
+		
+		//MazeMap maze = new MazeMap();
+		//maze.loadMap("res/map2.txt");
+		
+		/*for(int x=0; x<Constants.MAP_WIDTH; x++) {
+			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
+				map[x][y] = maze.getSpace(x,y);
+				if(map[x][y] == Constants.MAP_START) {
+					pX = x;
+					pY = y;
+				}
+			}
+		}*/
+		
+		printMaze(map);
+	
+		begin();
 	}
 	
 	/** Function main(String args[])
@@ -59,7 +87,7 @@ public class MazeGame extends Applet {
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		map = makeMaze();
+		/*map = makeMaze();
 		
 		pX = Constants.MAP_WIDTH/2;
 		pY = 0;
@@ -87,7 +115,7 @@ public class MazeGame extends Applet {
 		
 		printMaze(map);
 	
-		begin();
+		begin();*/
 	}
 	
 	/** Function begin()
