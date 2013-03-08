@@ -23,7 +23,6 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 import sql.InfoPackage;
@@ -31,6 +30,7 @@ import threads.SendData;
 import etc.Constants;
 
 public class MazeGame extends Applet {
+	private static final long serialVersionUID = 1L;
 	private static Random generator = new Random();
 	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
 	
@@ -44,8 +44,6 @@ public class MazeGame extends Applet {
 	
 	private static int pX, pY;			// Player x and y (within the map array)
 	
-	private static Clip clip;
-	private static File soundFile;
 	private static AudioInputStream stream;
 	
 	Canvas display_parent;
@@ -96,6 +94,7 @@ public class MazeGame extends Applet {
 		setLayout(new BorderLayout());
 		try {
 			display_parent = new Canvas() {
+				private static final long serialVersionUID = 1L;
 				public final void addNotify() {
 					super.addNotify();
 					startLWJGL();
@@ -157,9 +156,9 @@ public class MazeGame extends Applet {
 	/** Function begin()
 	 * Sets up OpenGL and lwjgl and contains the main loop.
 	 */
-	private static void mainLoop() {
+	private void mainLoop() {
 		// Start main loop
-		while(!Display.isCloseRequested()) {
+		while(running) {
 			// Clears screen and depth buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			
