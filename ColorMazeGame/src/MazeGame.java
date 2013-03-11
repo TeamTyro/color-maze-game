@@ -6,6 +6,8 @@
  */
 
 import java.applet.Applet;
+import java.awt.BorderLayout;
+import java.awt.Canvas;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -21,15 +23,14 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 import sql.InfoPackage;
 import threads.SendData;
 import etc.Constants;
-import etc.MazeMap;
 
 public class MazeGame extends Applet {
+	private static final long serialVersionUID = 1L;
 	private static Random generator = new Random();
 	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
 	
@@ -43,14 +44,77 @@ public class MazeGame extends Applet {
 	
 	private static int pX, pY;			// Player x and y (within the map array)
 	
-	/** Constructor MazeGame()
-	 * Initialize variables, etc.
-	 */
-	public MazeGame() {
-		
+	private static AudioInputStream stream;
+	
+	Canvas display_parent;
+	boolean running;
+	Thread gameThread;
+	
+	public void startLWJGL() {
+		gameThread = new Thread() {
+			public void run() {
+				running = true;
+				try {
+					Display.setParent(display_parent);
+					Display.create();
+					initGL();
+				} catch(LWJGLException ex) {
+					ex.printStackTrace();
+					return;
+				}
+				mainLoop();
+			}
+		};
+		gameThread.start();
+	}
+	
+	public void stopLWJGL() {
+		running = false;
+		try {
+			gameThread.join();
+		} catch(InterruptedException ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	public void start() {
+		
+	}
+	
+	public void stop() {
+		
+	}
+	
+	public void destroy() {
+		remove(display_parent);
+		super.destroy();
+	}
+	
+	public void init() {
+		setLayout(new BorderLayout());
+		try {
+			display_parent = new Canvas() {
+				private static final long serialVersionUID = 1L;
+				public final void addNotify() {
+					super.addNotify();
+					startLWJGL();
+				}
+				public final void removeNotify() {
+					stopLWJGL();
+					super.removeNotify();
+				}
+			};
+			display_parent.setSize(600,600);
+			add(display_parent);
+			display_parent.setFocusable(true);
+			display_parent.requestFocus();
+			display_parent.setIgnoreRepaint(true);
+			setVisible(true);
+		} catch(Exception ex) {
+			System.err.println(ex);
+			throw new RuntimeException("Unable to create display!");
+		}
+		
 		map = makeMaze();
 		
 		pX = Constants.MAP_WIDTH/2;
@@ -64,6 +128,7 @@ public class MazeGame extends Applet {
 		
 		startDate = new java.util.Date();
 		
+		// This section temporarily removed
 		//MazeMap maze = new MazeMap();
 		//maze.loadMap("res/map2.txt");
 		
@@ -78,66 +143,22 @@ public class MazeGame extends Applet {
 		}*/
 		
 		printMaze(map);
-	
-		begin();
 	}
 	
-	/** Function main(String args[])
-	 * Runs maze creation, sets some variables, and starts
-	 * the main loop.
-	 */
-	public static void main(String args[]) {
-		/*map = makeMaze();
-		
-		pX = Constants.MAP_WIDTH/2;
-		pY = 0;
-		keyRefresh = new boolean [6];
-		
-		recActions = new int [500];
-		operation = 0;
-		
-		currentAction = 0;
-		
-		startDate = new java.util.Date();
-		
-		MazeMap maze = new MazeMap();
-		maze.loadMap("map2.txt");
-		
-		for(int x=0; x<Constants.MAP_WIDTH; x++) {
-			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
-				map[x][y] = maze.getSpace(x,y);
-				if(map[x][y] == Constants.MAP_START) {
-					pX = x;
-					pY = y;
-				}
-			}
-		}
-		
-		printMaze(map);
-	
-		begin();*/
-	}
-	
-	/** Function begin()
-	 * Sets up OpenGL and lwjgl and contains the main loop.
-	 */
-	private static void begin() {
-		try {
-			Display.setDisplayMode(new DisplayMode(600,600));
-			Display.create();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
+	protected void initGL() {
 		// Init OpenGL
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		
+	}
+	
+	/** Function begin()
+	 * Sets up OpenGL and lwjgl and contains the main loop.
+	 */
+	private void mainLoop() {
 		// Start main loop
-		while(!Display.isCloseRequested()) {
+		while(running) {
 			// Clears screen and depth buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			
@@ -164,7 +185,7 @@ public class MazeGame extends Applet {
 			} else if(operation == 2) {
 				// Test is over
 			}
-			
+
 			Display.update();
 		}
 		
@@ -195,18 +216,22 @@ public class MazeGame extends Applet {
 	
 	private static void playMusic() {
 		Clip clip;
-		File soundFile = new File("fanfare.wav");
+		File soundFile = new File("res/fanfare.wav");
 		
 		try {
-			AudioInputStream stream = AudioSystem.getAudioInputStream(soundFile);
+			stream = AudioSystem.getAudioInputStream(soundFile);
 			AudioFormat format = stream.getFormat();
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
 			clip = (Clip) AudioSystem.getLine(info);
 			clip.open(stream);
-		    clip.start();
+			clip.start();
 		} catch (IOException ex) {
+			System.out.printf("ERROR: Audio IO Exception!\n");
 		} catch (UnsupportedAudioFileException ex) {
-		} catch (LineUnavailableException ex) { }
+			System.out.printf("ERROR: Audio Unsupported Exception!\n");
+		} catch (LineUnavailableException ex) {
+			System.out.printf("ERROR: Audio Line Exception!\n");
+		}
 	}
 	
 	/** Function render()
