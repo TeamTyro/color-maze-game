@@ -24,14 +24,14 @@ public class Neuron {
 		double s = 0;
 		for(Connection con : Inconnections){
 			Neuron leftNeuron = con.getFromNeuron();
-			double weight = con.getWeight();
-			double a = leftNeuron.getOutput(); //output from previous layer
+			double weight = con.getWeight();		//gets the weight between the input neuron 
+			double a = leftNeuron.getOutput(); 		//Gets the output of the input neuron
 			
-			s = s + (weight*a);
+			s = s + (weight*a);						//sets s the connection weight times input.
 		}
-		s = s + (biasConnection.getWeight()*bias);
+		s = s + (biasConnection.getWeight()*bias);	//Adds the bias to the total.
 		
-		output = g(s);
+		output = g(s);								//Sets the output to a number between -1 and 1
 	}
 	
 	
@@ -39,8 +39,8 @@ public class Neuron {
 		return sigmoid(x);
 	}
 
-	double sigmoid(double x) {
-		return 1.0 / (1.0 +  (Math.exp(-x)));
+	double sigmoid(double x) {	//Returns a number between -1 and 1
+		return 1.0 / (1.0 +  (Math.exp(-x)));	//exp(-x) returns eulers number raised to the power of -x
 	}
 	
 	public void addInConnectionsS(ArrayList<Neuron> inNeurons){

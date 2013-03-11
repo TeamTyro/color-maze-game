@@ -41,7 +41,7 @@ public class NeuralNetwork {
 	final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
 
 	public static void main(String[] args) {
-		NeuralNetwork nn = new NeuralNetwork(3, 4, 1);
+		NeuralNetwork nn = new NeuralNetwork(2, 4, 1);	//Sets up the entire neural network, with random weights.
 		int maxRuns = 50000;
 		double minErrorCondition = 0.001;
 		nn.run(maxRuns, minErrorCondition);
@@ -51,10 +51,8 @@ public class NeuralNetwork {
 		this.layers = new int[] { input, hidden, output };
 		df = new DecimalFormat("#.0#");
 
-		/**
-		 * Create all neurons and connections Connections are created in the
-		 * neuron class
-		 */
+		
+		//Create all neurons and connections Connections are created in the neuron class
 		for (int i = 0; i < layers.length; i++) {
 			if (i == 0) { // input layer
 				for (int j = 0; j < layers[i]; j++) {
@@ -83,17 +81,17 @@ public class NeuralNetwork {
 		}
 
 		// initialize random weights
-		for (Neuron neuron : hiddenLayer) {
+		for (Neuron neuron : hiddenLayer) {			//For each neuron
 			ArrayList<Connection> connections = neuron.getAllInConnections();
-			for (Connection conn : connections) {
-				double newWeight = getRandom();
+			for (Connection conn : connections) {	//For each connection, set up the weights between connections from inputs to hidden layer.
+				double newWeight = getRandom();		//Sets weight to a number between -1 and 1
 				conn.setWeight(newWeight);
 			}
 		}
-		for (Neuron neuron : outputLayer) {
+		for (Neuron neuron : outputLayer) {			//Sets up weights between connections from hidden layer to output.
 			ArrayList<Connection> connections = neuron.getAllInConnections();
 			for (Connection conn : connections) {
-				double newWeight = getRandom();
+				double newWeight = getRandom();		//Random number between -1 and 1
 				conn.setWeight(newWeight);
 			}
 		}
@@ -108,8 +106,42 @@ public class NeuralNetwork {
 		}
 	}
 
+	void run(int maxSteps, double minError) {
+		int i;
+		double error = 1;
+		
+		for (i = 0; i < maxSteps && error > minError; i++) { 	// Train neural network until minError reached or maxSteps exceeded
+			error = 0;
+			for (int p = 0; p < inputs.length; p++) {			//Go through each input[x]. If input amount =
+				setInput(inputs[p]);							//Sets each input neuron x to input[p][x]
+				activate();
+
+				output = getOutput();
+				resultOutputs[p] = output;
+
+				for (int j = 0; j < expectedOutputs[p].length; j++) {
+					double err = Math.pow(output[j] - expectedOutputs[p][j], 2);
+					error += err;
+				}
+
+				applyBackpropagation(expectedOutputs[p]);
+			}
+		}
+
+		printResult();
+		
+		System.out.println("Sum of squared errors = " + error);
+		System.out.println("##### EPOCH " + i+"\n");
+		if (i == maxSteps) {
+			System.out.println("!Error training try again");
+		} else {
+			printAllWeights();
+			printWeightUpdate();
+		}
+	}
+	
 	// random
-	double getRandom() {
+	double getRandom() {	//Gets random number between -1 and 1
 		return randomWeightMultiplier * (rand.nextDouble() * 2 - 1); // [-1;1[
 	}
 
@@ -121,7 +153,7 @@ public class NeuralNetwork {
 	 */
 	public void setInput(double inputs[]) {
 		for (int i = 0; i < inputLayer.size(); i++) {
-			inputLayer.get(i).setOutput(inputs[i]);
+			inputLayer.get(i).setOutput(inputs[i]);	//Sets input neuron 1 to input[p][1], sets input neuron 2 to input[p][2].
 		}
 	}
 
@@ -208,41 +240,6 @@ public class NeuralNetwork {
 		}
 	}
 
-	void run(int maxSteps, double minError) {
-		int i;
-		// Train neural network until minError reached or maxSteps exceeded
-		double error = 1;
-		for (i = 0; i < maxSteps && error > minError; i++) {
-			error = 0;
-			for (int p = 0; p < inputs.length; p++) {
-				setInput(inputs[p]);
-
-				activate();
-
-				output = getOutput();
-				resultOutputs[p] = output;
-
-				for (int j = 0; j < expectedOutputs[p].length; j++) {
-					double err = Math.pow(output[j] - expectedOutputs[p][j], 2);
-					error += err;
-				}
-
-				applyBackpropagation(expectedOutputs[p]);
-			}
-		}
-
-		printResult();
-		
-		System.out.println("Sum of squared errors = " + error);
-		System.out.println("##### EPOCH " + i+"\n");
-		if (i == maxSteps) {
-			System.out.println("!Error training try again");
-		} else {
-			printAllWeights();
-			printWeightUpdate();
-		}
-	}
-	
 	void printResult()
 	{
 		System.out.println("NN example with xor training");
