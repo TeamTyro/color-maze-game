@@ -50,6 +50,11 @@ public class MazeGame extends Applet {
 	boolean running;
 	Thread gameThread;
 	
+	boolean showDiagonal = false;
+	
+	/** Function startLWJGL()
+	 * Executes LWJGL's startup methods.
+	 */
 	public void startLWJGL() {
 		gameThread = new Thread() {
 			public void run() {
@@ -68,6 +73,9 @@ public class MazeGame extends Applet {
 		gameThread.start();
 	}
 	
+	/** Function stopLWJGL
+	 * Stops the game thread.
+	 */
 	public void stopLWJGL() {
 		running = false;
 		try {
@@ -77,19 +85,31 @@ public class MazeGame extends Applet {
 		}
 	}
 	
+	/** Function start()
+	 * Placeholder for the expected start() method in applets.
+	 */
 	public void start() {
 		
 	}
 	
+	/** Function stop()
+	 * Placeholder for the expected stop() method in applets.
+	 */
 	public void stop() {
 		
 	}
 	
+	/** Function destroy()
+	 * Destroys the canvas.
+	 */
 	public void destroy() {
 		remove(display_parent);
 		super.destroy();
 	}
 	
+	/** Function init()
+	 * Initializes the canvas and global variables
+	 */
 	public void init() {
 		setLayout(new BorderLayout());
 		try {
@@ -145,6 +165,9 @@ public class MazeGame extends Applet {
 		printMaze(map);
 	}
 	
+	/** Function initGL()
+	 * Calls OpenGL initialization functions.
+	 */
 	protected void initGL() {
 		// Init OpenGL
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -192,8 +215,12 @@ public class MazeGame extends Applet {
 		Display.destroy();
 	}
 	
-	private static void replayGame(int [] s_recActions, int currAction) {
-		switch(s_recActions[currAction]) {
+	/** Function replayGame(int [] s_recActions, int s_length)
+	 * Replays the set of actions from the array s_recActions to the point
+	 * specified by int s_length.
+	 */
+	private void replayGame(int [] s_recActions, int s_length) {
+		switch(s_recActions[s_length]) {
 		case Constants.DIR_DOWN:
 			pY++;
 			break;
@@ -214,7 +241,10 @@ public class MazeGame extends Applet {
 		}
 	}
 	
-	private static void playMusic() {
+	/** Function playMusic()
+	 * Loads res/fanfare.wav and plays it.
+	 */
+	private void playMusic() {
 		Clip clip;
 		File soundFile = new File("res/fanfare.wav");
 		
@@ -237,7 +267,7 @@ public class MazeGame extends Applet {
 	/** Function render()
 	 * Draws all visible objects.
 	 */
-	private static void render() {
+	private void render() {
 		int x, y;	// Bottom left corner coordinates (for readability)
 		
 		// Left box
@@ -285,49 +315,51 @@ public class MazeGame extends Applet {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
-		// Top-Left box
-		x = -300;
-		y = 100;
-		setColor(pX-1, pY-1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
-		
-		// Top-Right box
-		x = 100;
-		y = 100;
-		setColor(pX+1, pY-1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
-		
-		// Bottom-Left box
-		x = -300;
-		y = -300;
-		setColor(pX-1, pY+1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
-		
-		// Bottom-Right box
-		x = 100;
-		y = -300;
-		setColor(pX+1, pY+1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
+		if(showDiagonal) {
+			// Top-Left box
+			x = -300;
+			y = 100;
+			setColor(pX-1, pY-1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+			
+			// Top-Right box
+			x = 100;
+			y = 100;
+			setColor(pX+1, pY-1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+			
+			// Bottom-Left box
+			x = -300;
+			y = -300;
+			setColor(pX-1, pY+1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+			
+			// Bottom-Right box
+			x = 100;
+			y = -300;
+			setColor(pX+1, pY+1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+		}
 		
 		// Center box
 		x = -100;
@@ -356,7 +388,7 @@ public class MazeGame extends Applet {
 	 * Returns a fitting color based on what is on the given
 	 * coordinates on the given map.
 	 */
-	private static void setColor(int x, int y, int [][] tmap) {
+	private void setColor(int x, int y, int [][] tmap) {
 		if(x<0 || y<0 || x>Constants.MAP_WIDTH-1 || y>Constants.MAP_HEIGHT-1) {
 			GL11.glColor3f(1,0,0);
 			return;
@@ -382,7 +414,7 @@ public class MazeGame extends Applet {
 	 * Reads for key input and acts accordingly. More specifically,
 	 * the player is moved from arrow key presses.
 	 */
-	private static void checkKeys() {
+	private void checkKeys() {
 		// Check for "Up" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[Constants.DIR_UP]) {
 			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {
@@ -442,7 +474,7 @@ public class MazeGame extends Applet {
 	 * Checks move requests for validity. Returns true if no
 	 * obstructions would keep the player from moving in that direction.
 	 */
-	private static boolean movePlayer(int dir, int x, int y, int [][] tmap) {
+	private boolean movePlayer(int dir, int x, int y, int [][] tmap) {
 		switch(dir) {
 		case Constants.DIR_UP:
 			if(y>0) {
@@ -498,7 +530,7 @@ public class MazeGame extends Applet {
 	 * eD endDate
 	 * a=recActions*
 	 */
-	private static InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
+	private InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
 		InfoPackage out = new InfoPackage();
 		
 		out.setDates(sD, eD);
@@ -507,18 +539,12 @@ public class MazeGame extends Applet {
 		return out;
 	}
 	
-	/** Function sendData(InfoPackage d)
-	 * Sends the data in InfoPackage d to the database in the form of an
-	 * XML-standard string.
-	 */
-
-	
 	/** Function makeMaze()
 	 * Randomly creates a maze by drawing lines of a random
 	 * direction and size and returns a two dimensional
 	 * array with the map information.
 	 */
-	private static int[][] makeMaze() {
+	private int[][] makeMaze() {
 		int [][] out = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
@@ -584,7 +610,7 @@ public class MazeGame extends Applet {
 	/** Function printMaze(int[][] tmap)
 	 * Prints the given map as text.
 	 */
-	private static void printMaze(int[][] tmap) {
+	private void printMaze(int[][] tmap) {
 		for(int x=0; x<Constants.MAP_WIDTH+2; x++) {
 			System.out.printf("[-]");
 		}
