@@ -6,6 +6,8 @@
  */
 
 import java.applet.Applet;
+import java.awt.BorderLayout;
+import java.awt.Canvas;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -21,15 +23,14 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 import sql.InfoPackage;
 import threads.SendData;
 import etc.Constants;
-import etc.MazeMap;
 
 public class MazeGame extends Applet {
+	private static final long serialVersionUID = 1L;
 	private static Random generator = new Random();
 	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
 	
@@ -43,18 +44,97 @@ public class MazeGame extends Applet {
 	
 	private static int pX, pY;			// Player x and y (within the map array)
 	
-	private static Clip clip;
-	private static File soundFile;
 	private static AudioInputStream stream;
 	
-	/** Constructor MazeGame()
-	 * Initialize variables, etc.
+	Canvas display_parent;
+	boolean running;
+	Thread gameThread;
+	
+	boolean showDiagonal = false;
+	
+	/** Function startLWJGL()
+	 * Executes LWJGL's startup methods.
 	 */
-	public MazeGame() {
+	public void startLWJGL() {
+		gameThread = new Thread() {
+			public void run() {
+				running = true;
+				try {
+					Display.setParent(display_parent);
+					Display.create();
+					initGL();
+				} catch(LWJGLException ex) {
+					ex.printStackTrace();
+					return;
+				}
+				mainLoop();
+			}
+		};
+		gameThread.start();
+	}
+	
+	/** Function stopLWJGL
+	 * Stops the game thread.
+	 */
+	public void stopLWJGL() {
+		running = false;
+		try {
+			gameThread.join();
+		} catch(InterruptedException ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	/** Function start()
+	 * Placeholder for the expected start() method in applets.
+	 */
+	public void start() {
 		
 	}
 	
-	public void start() {
+	/** Function stop()
+	 * Placeholder for the expected stop() method in applets.
+	 */
+	public void stop() {
+		
+	}
+	
+	/** Function destroy()
+	 * Destroys the canvas.
+	 */
+	public void destroy() {
+		remove(display_parent);
+		super.destroy();
+	}
+	
+	/** Function init()
+	 * Initializes the canvas and global variables
+	 */
+	public void init() {
+		setLayout(new BorderLayout());
+		try {
+			display_parent = new Canvas() {
+				private static final long serialVersionUID = 1L;
+				public final void addNotify() {
+					super.addNotify();
+					startLWJGL();
+				}
+				public final void removeNotify() {
+					stopLWJGL();
+					super.removeNotify();
+				}
+			};
+			display_parent.setSize(600,600);
+			add(display_parent);
+			display_parent.setFocusable(true);
+			display_parent.requestFocus();
+			display_parent.setIgnoreRepaint(true);
+			setVisible(true);
+		} catch(Exception ex) {
+			System.err.println(ex);
+			throw new RuntimeException("Unable to create display!");
+		}
+		
 		map = makeMaze();
 		
 		pX = Constants.MAP_WIDTH/2;
@@ -68,6 +148,7 @@ public class MazeGame extends Applet {
 		
 		startDate = new java.util.Date();
 		
+		// This section temporarily removed
 		//MazeMap maze = new MazeMap();
 		//maze.loadMap("res/map2.txt");
 		
@@ -82,66 +163,25 @@ public class MazeGame extends Applet {
 		}*/
 		
 		printMaze(map);
-	
-		begin();
 	}
 	
-	/** Function main(String args[])
-	 * Runs maze creation, sets some variables, and starts
-	 * the main loop.
+	/** Function initGL()
+	 * Calls OpenGL initialization functions.
 	 */
-	public static void main(String args[]) {
-		/*map = makeMaze();
-		
-		pX = Constants.MAP_WIDTH/2;
-		pY = 0;
-		keyRefresh = new boolean [6];
-		
-		recActions = new int [500];
-		operation = 0;
-		
-		currentAction = 0;
-		
-		startDate = new java.util.Date();
-		
-		MazeMap maze = new MazeMap();
-		maze.loadMap("res/map2.txt");
-		
-		for(int x=0; x<Constants.MAP_WIDTH; x++) {
-			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
-				map[x][y] = maze.getSpace(x,y);
-				if(map[x][y] == Constants.MAP_START) {
-					pX = x;
-					pY = y;
-				}
-			}
-		}
-		
-		printMaze(map);
-	
-		begin();*/
-	}
-	
-	/** Function begin()
-	 * Sets up OpenGL and lwjgl and contains the main loop.
-	 */
-	private static void begin() {
-		try {
-			Display.setDisplayMode(new DisplayMode(600,600));
-			Display.create();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
+	protected void initGL() {
 		// Init OpenGL
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		
+	}
+	
+	/** Function begin()
+	 * Sets up OpenGL and lwjgl and contains the main loop.
+	 */
+	private void mainLoop() {
 		// Start main loop
-		while(!Display.isCloseRequested()) {
+		while(running) {
 			// Clears screen and depth buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			
@@ -175,8 +215,12 @@ public class MazeGame extends Applet {
 		Display.destroy();
 	}
 	
-	private static void replayGame(int [] s_recActions, int currAction) {
-		switch(s_recActions[currAction]) {
+	/** Function replayGame(int [] s_recActions, int s_length)
+	 * Replays the set of actions from the array s_recActions to the point
+	 * specified by int s_length.
+	 */
+	private void replayGame(int [] s_recActions, int s_length) {
+		switch(s_recActions[s_length]) {
 		case Constants.DIR_DOWN:
 			pY++;
 			break;
@@ -197,7 +241,10 @@ public class MazeGame extends Applet {
 		}
 	}
 	
-	private static void playMusic() {
+	/** Function playMusic()
+	 * Loads res/fanfare.wav and plays it.
+	 */
+	private void playMusic() {
 		Clip clip;
 		File soundFile = new File("res/fanfare.wav");
 		
@@ -220,7 +267,7 @@ public class MazeGame extends Applet {
 	/** Function render()
 	 * Draws all visible objects.
 	 */
-	private static void render() {
+	private void render() {
 		int x, y;	// Bottom left corner coordinates (for readability)
 		
 		// Left box
@@ -268,49 +315,51 @@ public class MazeGame extends Applet {
 			GL11.glVertex2f(x  +0,y+200);
 		GL11.glEnd();
 		
-		// Top-Left box
-		x = -300;
-		y = 100;
-		setColor(pX-1, pY-1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
-		
-		// Top-Right box
-		x = 100;
-		y = 100;
-		setColor(pX+1, pY-1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
-		
-		// Bottom-Left box
-		x = -300;
-		y = -300;
-		setColor(pX-1, pY+1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
-		
-		// Bottom-Right box
-		x = 100;
-		y = -300;
-		setColor(pX+1, pY+1, map);
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex2f(x    ,y    );
-			GL11.glVertex2f(x+200,y  +0);
-			GL11.glVertex2f(x+200,y+200);
-			GL11.glVertex2f(x  +0,y+200);
-		GL11.glEnd();
+		if(showDiagonal) {
+			// Top-Left box
+			x = -300;
+			y = 100;
+			setColor(pX-1, pY-1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+			
+			// Top-Right box
+			x = 100;
+			y = 100;
+			setColor(pX+1, pY-1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+			
+			// Bottom-Left box
+			x = -300;
+			y = -300;
+			setColor(pX-1, pY+1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+			
+			// Bottom-Right box
+			x = 100;
+			y = -300;
+			setColor(pX+1, pY+1, map);
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(x    ,y    );
+				GL11.glVertex2f(x+200,y  +0);
+				GL11.glVertex2f(x+200,y+200);
+				GL11.glVertex2f(x  +0,y+200);
+			GL11.glEnd();
+		}
 		
 		// Center box
 		x = -100;
@@ -339,7 +388,7 @@ public class MazeGame extends Applet {
 	 * Returns a fitting color based on what is on the given
 	 * coordinates on the given map.
 	 */
-	private static void setColor(int x, int y, int [][] tmap) {
+	private void setColor(int x, int y, int [][] tmap) {
 		if(x<0 || y<0 || x>Constants.MAP_WIDTH-1 || y>Constants.MAP_HEIGHT-1) {
 			GL11.glColor3f(1,0,0);
 			return;
@@ -365,7 +414,7 @@ public class MazeGame extends Applet {
 	 * Reads for key input and acts accordingly. More specifically,
 	 * the player is moved from arrow key presses.
 	 */
-	private static void checkKeys() {
+	private void checkKeys() {
 		// Check for "Up" key
 		if(Keyboard.isKeyDown(Keyboard.KEY_UP) && keyRefresh[Constants.DIR_UP]) {
 			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {
@@ -425,7 +474,7 @@ public class MazeGame extends Applet {
 	 * Checks move requests for validity. Returns true if no
 	 * obstructions would keep the player from moving in that direction.
 	 */
-	private static boolean movePlayer(int dir, int x, int y, int [][] tmap) {
+	private boolean movePlayer(int dir, int x, int y, int [][] tmap) {
 		switch(dir) {
 		case Constants.DIR_UP:
 			if(y>0) {
@@ -481,7 +530,7 @@ public class MazeGame extends Applet {
 	 * eD endDate
 	 * a=recActions*
 	 */
-	private static InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
+	private InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
 		InfoPackage out = new InfoPackage();
 		
 		out.setDates(sD, eD);
@@ -490,18 +539,12 @@ public class MazeGame extends Applet {
 		return out;
 	}
 	
-	/** Function sendData(InfoPackage d)
-	 * Sends the data in InfoPackage d to the database in the form of an
-	 * XML-standard string.
-	 */
-
-	
 	/** Function makeMaze()
 	 * Randomly creates a maze by drawing lines of a random
 	 * direction and size and returns a two dimensional
 	 * array with the map information.
 	 */
-	private static int[][] makeMaze() {
+	private int[][] makeMaze() {
 		int [][] out = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
@@ -567,7 +610,7 @@ public class MazeGame extends Applet {
 	/** Function printMaze(int[][] tmap)
 	 * Prints the given map as text.
 	 */
-	private static void printMaze(int[][] tmap) {
+	private void printMaze(int[][] tmap) {
 		for(int x=0; x<Constants.MAP_WIDTH+2; x++) {
 			System.out.printf("[-]");
 		}
