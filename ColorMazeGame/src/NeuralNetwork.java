@@ -33,15 +33,15 @@ public class NeuralNetwork {
 	final double inputs[][] = { { 1, 1 }, { 1, 0 }, { 0, 1 }, { 0, 0 } };
 
 	// Corresponding outputs, xor training data
-	final double expectedOutputs[][] = { { 0 }, { 1 }, { 1 }, { 0 } };
-	double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1 } }; // dummy init
+	final double expectedOutputs[][] = { { 0,0,0,1}, { 0,0,1,0}, { 0,1,0,0 }, { 1,0,0,0} };
+	double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1} }; 			// dummy init. Try messing around with it(?)
 	double output[];
 
 	// for weight update all
 	final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
 
 	public static void main(String[] args) {
-		NeuralNetwork nn = new NeuralNetwork(2, 4, 1);	//Sets up the entire neural network, with random weights.
+		NeuralNetwork nn = new NeuralNetwork(2, 4, 4);	//Sets up the entire neural network, with random weights.
 		int maxRuns = 50000;
 		double minErrorCondition = 0.001;
 		nn.run(maxRuns, minErrorCondition);
@@ -112,14 +112,14 @@ public class NeuralNetwork {
 		
 		for (i = 0; i < maxSteps && error > minError; i++) { 	// Train neural network until minError reached or maxSteps exceeded
 			error = 0;
-			for (int p = 0; p < inputs.length; p++) {			//Go through each input[x]. If input amount =
-				setInput(inputs[p]);							//Sets each input neuron x to input[p][x]
-				activate();
+			for (int p = 0; p < inputs.length; p++) {			//Goes through each input set. 
+				setInput(inputs[p]);							//Sets each input neuron x to input[p][x] (sets each neuron to the current input set)
+				activate();										//Goes through each hidden and output layer neuron, and calculates output
 
-				output = getOutput();
-				resultOutputs[p] = output;
+				output = getOutput();							//returns output[], an array holding the output of each neuron.						
+				resultOutputs[p] = output;						//this adds the second part of the array to resultOutputs[][], in part [p][]
 
-				for (int j = 0; j < expectedOutputs[p].length; j++) {
+				for (int j = 0; j < expectedOutputs[p].length; j++) {				//Should only go through once
 					double err = Math.pow(output[j] - expectedOutputs[p][j], 2);
 					error += err;
 				}
@@ -139,8 +139,7 @@ public class NeuralNetwork {
 			printWeightUpdate();
 		}
 	}
-	
-	// random
+
 	double getRandom() {	//Gets random number between -1 and 1
 		return randomWeightMultiplier * (rand.nextDouble() * 2 - 1); // [-1;1[
 	}
@@ -157,7 +156,7 @@ public class NeuralNetwork {
 		}
 	}
 
-	public double[] getOutput() {
+	public double[] getOutput() {	//goes through the output neurons, and returns an array output[x] with the output of each neuron.
 		double[] outputs = new double[outputLayer.size()];
 		for (int i = 0; i < outputLayer.size(); i++)
 			outputs[i] = outputLayer.get(i).getOutput();
@@ -197,19 +196,19 @@ public class NeuralNetwork {
 		}
 
 		int i = 0;
-		for (Neuron n : outputLayer) {
+		for (Neuron n : outputLayer) {											//For each output neuron, it will: (sets the weights for each connection.
 			ArrayList<Connection> connections = n.getAllInConnections();
-			for (Connection con : connections) {
-				double ak = n.getOutput();
+			for (Connection con : connections) {								//For each connection between any neuron
+				double ak = n.getOutput();										
 				double ai = con.leftNeuron.getOutput();
 				double desiredOutput = expectedOutput[i];
 
-				double partialDerivative = -ak * (1 - ak) * ai
-						* (desiredOutput - ak);
-				double deltaWeight = -learningRate * partialDerivative;
-				double newWeight = con.getWeight() + deltaWeight;
-				con.setDeltaWeight(deltaWeight);
-				con.setWeight(newWeight + momentum * con.getPrevDeltaWeight());
+				double partialDerivative = -ak * (1 - ak) * ai					
+						* (desiredOutput - ak);									//((-neuronOutput) * (1 - neuronOutput)) * hiddenLayerNeuron * desiredOutput
+				double deltaWeight = -learningRate * partialDerivative;			//delta = Multiplies by the negative learning rate.
+				double newWeight = con.getWeight() + deltaWeight;				//newWeight = current connection weight + deltaWeight (that we figured out above.)
+				con.setDeltaWeight(deltaWeight);								//Records this as the previous deltaWeight. Used for figuring out momentum in learning.
+				con.setWeight(newWeight + momentum * con.getPrevDeltaWeight());	
 			}
 			i++;
 		}
