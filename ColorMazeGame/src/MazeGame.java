@@ -10,6 +10,8 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Random;
 
 import javax.sound.sampled.AudioFormat;
@@ -28,6 +30,7 @@ import org.lwjgl.opengl.GL11;
 import sql.InfoPackage;
 import threads.SendData;
 import etc.Constants;
+import etc.MazeMap;
 
 public class MazeGame extends Applet {
 	private static final long serialVersionUID = 1L;
@@ -149,10 +152,16 @@ public class MazeGame extends Applet {
 		startDate = new java.util.Date();
 		
 		// This section temporarily removed
-		//MazeMap maze = new MazeMap();
-		//maze.loadMap("res/map2.txt");
+		MazeMap maze = new MazeMap();
+		URL mapURL;
+		try {
+			mapURL = new URL("http://jackketcham.com/teamtyro/game/map1.txt");
+			maze.loadMap(mapURL);
+		} catch(MalformedURLException ex) {
+			System.out.printf("ERROR: Malformed URL.");
+		}
 		
-		/*for(int x=0; x<Constants.MAP_WIDTH; x++) {
+		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
 				map[x][y] = maze.getSpace(x,y);
 				if(map[x][y] == Constants.MAP_START) {
@@ -160,7 +169,7 @@ public class MazeGame extends Applet {
 					pY = y;
 				}
 			}
-		}*/
+		}
 		
 		printMaze(map);
 	}

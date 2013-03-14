@@ -1,8 +1,10 @@
 package etc;
 
-import java.util.*;
-import java.io.*;
-import etc.Constants;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 public class MazeMap {
 	private static int map [] [];
@@ -15,16 +17,17 @@ public class MazeMap {
 		return map[s_x][s_y];
 	}
 	
-	public boolean loadMap(String s_filename) {
+	public boolean loadMap(URL s_fileURL) {
 		boolean success = false;
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(s_filename));
+		try {			
+			s_fileURL.openConnection();
+			InputStream reader = s_fileURL.openStream();
 			
 			int x = 0;
 			int y = 0;
 			
 			int section = 0;
-			while ((section = in.read()) != 0 && y < Constants.MAP_HEIGHT) {
+			while ((section = reader.read()) != 0 && y < Constants.MAP_HEIGHT) {
 				switch(section) {
 				case 'b':
 					map[x][y] = Constants.MAP_BLOCK;
@@ -48,7 +51,6 @@ public class MazeMap {
 			}
 			
 			success = true;
-			in.close();
 		} catch(IOException ex) {
 			System.out.printf("ERROR: Couldn't load map\n");
 			success = false;
