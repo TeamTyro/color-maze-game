@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 
+import Net.ReadSolutions;
 import Net.Connection;
 import Net.Neuron;
 
@@ -41,6 +42,7 @@ public class NeuralNetwork {
 	final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
 
 	public static void main(String[] args) {
+		ReadSolutions r = new ReadSolutions();
 		NeuralNetwork nn = new NeuralNetwork(2, 4, 4);	//Sets up the entire neural network, with random weights.
 		int maxRuns = 50000;
 		double minErrorCondition = 0.001;
