@@ -29,27 +29,22 @@ public class NeuralNetwork {
 
 	final double learningRate = 0.9f;
 	final double momentum = 0.7f;
-
 	// Inputs for xor problem
-	final double inputs[][] = { { 1, 1 }, { 1, 0 }, { 0, 1 }, { 0, 0 } };
-
+	public double inputs[][] = { { 1, 1 }, { 1, 0 }, { 0, 1 }, { 0, 0 } };					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 	// Corresponding outputs, xor training data
-	final double expectedOutputs[][] = { { 0,0,0,1}, { 0,0,1,0}, { 0,1,0,0 }, { 1,0,0,0} };
-	double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1} }; 			// dummy init. Try messing around with it(?)
+	public double expectedOutputs[][];// = { { 0,0,0,1}, { 0,0,1,0}, { 0,1,0,0 }, { 1,0,0,0} };	//
+	double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1} }; 							// dummy init. Try messing around with it(?)
 	double output[];
-
 	// for weight update all
 	final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
+	//The following is modifications that I have made to the program.
+	ReadSolutions r = new ReadSolutions();
 
-	public static void main(String[] args) {
-		ReadSolutions r = new ReadSolutions();
-		NeuralNetwork nn = new NeuralNetwork(2, 4, 4);	//Sets up the entire neural network, with random weights.
-		int maxRuns = 50000;
-		double minErrorCondition = 0.001;
-		nn.run(maxRuns, minErrorCondition);
-	}
-
-	public NeuralNetwork(int input, int hidden, int output) {
+	public NeuralNetwork(int input, int hidden, int output, float percent, int maxRuns) {
+		
+		inputs = 	r.getInputs(percent);	//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		expectedOutputs = 	r.getOutputs();
+		
 		this.layers = new int[] { input, hidden, output };
 		df = new DecimalFormat("#.0#");
 
@@ -106,6 +101,9 @@ public class NeuralNetwork {
 			trainedWeights();
 			updateAllWeights();
 		}
+		
+		double minErrorCondition = 0.001;
+		run(maxRuns, minErrorCondition);
 	}
 
 	void run(int maxSteps, double minError) {
