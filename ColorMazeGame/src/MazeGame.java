@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import sql.InfoPackage;
 import threads.SendData;
 import etc.Constants;
+import etc.ErrorReport;
 import etc.MazeMap;
 
 public class MazeGame extends Applet {
@@ -55,7 +56,8 @@ public class MazeGame extends Applet {
 					Display.create();
 					initGL();
 				} catch(LWJGLException ex) {
-					ex.printStackTrace();
+					ErrorReport e = new ErrorReport(ex.getMessage());
+					e.makeFile();
 					return;
 				}
 				mainLoop();
@@ -72,7 +74,8 @@ public class MazeGame extends Applet {
 		try {
 			gameThread.join();
 		} catch(InterruptedException ex) {
-			ex.printStackTrace();
+			ErrorReport e = new ErrorReport(ex.getMessage());
+			e.makeFile();
 		}
 	}
 	
@@ -122,7 +125,8 @@ public class MazeGame extends Applet {
 			display_parent.setIgnoreRepaint(true);
 			setVisible(true);
 		} catch(Exception ex) {
-			System.err.println(ex);
+			ErrorReport e = new ErrorReport(ex.getMessage());
+			e.makeFile();
 			throw new RuntimeException("Unable to create display!");
 		}
 		
@@ -146,7 +150,8 @@ public class MazeGame extends Applet {
 			mapURL = new URL("http://jackketcham.com/teamtyro/game/map1.txt");
 			maze.loadMap(mapURL);
 		} catch(MalformedURLException ex) {
-			System.out.printf("ERROR: Malformed URL.");
+			ErrorReport e = new ErrorReport(ex.getMessage());
+			e.makeFile();
 		}
 		
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
