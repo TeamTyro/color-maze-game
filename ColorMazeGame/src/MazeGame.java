@@ -35,7 +35,7 @@ import etc.MazeMap;
 public class MazeGame extends Applet {
 	private static final long serialVersionUID = 1L;
 	private static Random generator = new Random();
-	private static int[][] map;			// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)
+	private static int[][] map;			// Universal map array 
 	
 	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]
 	private static int currentAction; 	// Keeps track of which part of recActions your using. Basically just a counter for recActions
@@ -205,7 +205,6 @@ public class MazeGame extends Applet {
 					SendData sender = new SendData(packUp(startDate, endDate, recActions));
 					(new Thread(sender)).start();
 					
-					playMusic();
 					operation = 2;
 				}
 			} else if(operation == 1) {
@@ -247,29 +246,6 @@ public class MazeGame extends Applet {
 		    Thread.sleep(100);
 		} catch(InterruptedException ex) {
 		    Thread.currentThread().interrupt();
-		}
-	}
-	
-	/** Function playMusic()
-	 * Loads res/fanfare.wav and plays it.
-	 */
-	private void playMusic() {
-		Clip clip;
-		File soundFile = new File("res/fanfare.wav");
-		
-		try {
-			stream = AudioSystem.getAudioInputStream(soundFile);
-			AudioFormat format = stream.getFormat();
-			DataLine.Info info = new DataLine.Info(Clip.class, format);
-			clip = (Clip) AudioSystem.getLine(info);
-			clip.open(stream);
-			clip.start();
-		} catch (IOException ex) {
-			System.out.printf("ERROR: Audio IO Exception!\n");
-		} catch (UnsupportedAudioFileException ex) {
-			System.out.printf("ERROR: Audio Unsupported Exception!\n");
-		} catch (LineUnavailableException ex) {
-			System.out.printf("ERROR: Audio Line Exception!\n");
 		}
 	}
 	
@@ -414,7 +390,7 @@ public class MazeGame extends Applet {
 			GL11.glColor3f(0,1,0);
 			break;
 		case Constants.MAP_START:
-			GL11.glColor3f(1,1,0);
+			GL11.glColor3f(0,0,1);
 			break;
 		}
 	}
@@ -467,15 +443,6 @@ public class MazeGame extends Applet {
 			keyRefresh[Constants.DIR_RIGHT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
 			keyRefresh[Constants.DIR_RIGHT] = true;
-		}
-		// Check for "R" key
-		if(Keyboard.isKeyDown(Keyboard.KEY_R) && keyRefresh[5]) {
-			keyRefresh[5] = false;
-			operation = 1;
-			pX = Constants.MAP_WIDTH/2;
-			pY = 0;
-		} else if(!Keyboard.isKeyDown(Keyboard.KEY_R)) {
-			keyRefresh[5] = true;
 		}
 	}
 	
@@ -544,6 +511,10 @@ public class MazeGame extends Applet {
 		
 		out.setDates(sD, eD);
 		out.setActions(a);
+		out.setSurvey(	getParameter("AgeRange"),
+						getParameter("Ethnicity"),
+						getParameter("Profession"),
+						getParameter("Email") );
 		
 		return out;
 	}

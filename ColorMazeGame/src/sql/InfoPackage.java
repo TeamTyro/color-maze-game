@@ -5,6 +5,7 @@ import etc.Constants;
 public class InfoPackage {
 	private static java.util.Date d_start, d_end;
 	private static int [] _actions;
+	private static String AgeRange, Ethnicity, Profession, Email;
 	
 	public InfoPackage () {
 		_actions = new int [500];
@@ -28,6 +29,13 @@ public class InfoPackage {
 		}
 	}
 	
+	public void setSurvey(String s_AgeRange, String s_Ethnicity, String s_Profession, String s_Email) {
+		AgeRange = s_AgeRange;
+		Ethnicity = s_Ethnicity;
+		Profession = s_Profession;
+		Email = s_Email;
+	}
+	
 	public int [] getActions() {
 		return _actions;
 	}
@@ -38,5 +46,20 @@ public class InfoPackage {
 		} else {
 			return d_end;
 		}
+	}
+	
+	public String getSurvey(int which) {
+		switch(which) {
+		case 0:
+			return AgeRange;
+		case 1:
+			return Ethnicity;
+		case 2:
+			return Profession;
+		case 3:
+			return Email;
+		}
+		
+		return "";
 	}
 }
