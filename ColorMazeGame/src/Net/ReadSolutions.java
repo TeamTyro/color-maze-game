@@ -6,6 +6,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
+import etc.Constants;
+import etc.MazeMap;
+
 public class ReadSolutions {
 	
 	public static String[] solutions;	//Holds a string of each solution
@@ -13,11 +16,19 @@ public class ReadSolutions {
 	public static double outputs[][];
 	public static int totalMoves;
 	public static int solutionsCount;
+	public static MazeMap m = new MazeMap();
+	public static int[][] map;
 	public Random r = new Random(1);
+	public static String mapnumber;
+	public static int sX;				//The x start position of the player
+	public static int sY;				//The y start position of the player
+	public static Constants constant = new Constants();
 	
-	public ReadSolutions(){
+	public ReadSolutions(String map){
+		mapnumber = map;
 		System.out.println("////SOLUTION READER////");
 		solutions = readSolutions();	//Sets the solutions array to all of the data in the text file. solutions[solution#] = String of solution
+		gemapArray();
 	}
 	
 	public static String[] readSolutions(){
@@ -85,13 +96,50 @@ public class ReadSolutions {
 	
 	public double[] getSituation(String solution, int move){							//Gets the inputs at the time that a particular move was performed, in the String solution.
 		
+		int[] situation = new int[5];	//Order: [0] = up, [1] = down, [2] = left, [3] = right, [4] = lastOutput. 0 = open block, 1 = filled block.
+		
+		int rightMoves = 0;
+		int leftMoves = 0;
+		int upMoves = 0;
+		int downMoves = 0;
+		
+		for(int m = 0; m < solution.length()-move; m++){
+			if(solution.charAt(m) == 'r'){	rightMoves += 1;}
+			if(solution.charAt(m) == 'l'){	leftMoves += 1;	}
+			if(solution.charAt(m) == 'u'){	upMoves += 1;	}
+			if(solution.charAt(m) == 'd'){	downMoves += 1;	}
+		}
+		int pX = sX + (rightMoves - leftMoves);	//finds the player position at that time.
+		int pY = sY + (downMoves  - upMoves	);	//Finds the player position at that time.
+		
+		
+		situation[0] = map[pX][pY-1];	//above you
+		situation[1] = map[pX][pY+1];	//below you
+		situation[2] = map[pX-1][pY];		//left of you
+		situation[3] = map[pX+1][pY];		//right of you
+		situation[4] = ;
+
 	}
 	
 	public double[][] getOutputs(){	//The output array is set inside of the getInputs(percent) method.
 		return outputs;
 	}
 	
-	
+	public static void getmapArray(){	//Sets the map[][] array to the same map[][] array in the main MazeGame.
+		m.loadMap(mapnumber);	//loads the map.
+		
+		for(int x=0; x<Constants.MAP_WIDTH; x++) {		
+			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
+				map[x][y] = m.getSpace(x,y);
+				if(map[x][y] == Constants.MAP_START) {
+					sX = x;
+					sY = y;
+				}
+			}
+		}	
+		
+		
+	}
 	
 	
 	

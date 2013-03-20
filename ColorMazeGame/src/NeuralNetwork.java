@@ -38,9 +38,11 @@ public class NeuralNetwork {
 	// for weight update all
 	final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
 	//The following is modifications that I have made to the program.
-	ReadSolutions r = new ReadSolutions();
+	ReadSolutions r;
 
-	public NeuralNetwork(int input, int hidden, int output, float percent, int maxRuns) {
+	public NeuralNetwork(int input, int hidden, int output, float percent, int maxRuns, String map) {
+		
+		r = new ReadSolutions(map);
 		
 		inputs = 	r.getInputs(percent);	//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
 		expectedOutputs = 	r.getOutputs();

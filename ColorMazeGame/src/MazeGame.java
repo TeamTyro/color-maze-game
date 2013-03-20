@@ -37,14 +37,14 @@ public class MazeGame {
 	public static int[][] mapCount;			//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
 	public static NeuralNetwork ai; 		//is set up in the begin method
 	public static boolean ranIntoWall = false;
-	public static boolean hasWonGame = false;
-	
+	public static boolean hasWonGame = false;	
+	public static String mapnumber = "map1.txt";	//What map the AI will be learning.
 	/* Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		ai = new NeuralNetwork(5, 4, 4, .03f, runs);
+		ai = new NeuralNetwork(5, 4, 4, .03f, runs, mapnumber);
 		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
 		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
 		
@@ -73,7 +73,7 @@ public class MazeGame {
 		moveCount = 0;
 		ranIntoWall = false;
 		MazeMap maze = new MazeMap();//loads map from text file
-		maze.loadMap("map1.txt");
+		maze.loadMap(mapnumber);
 		
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
@@ -156,7 +156,7 @@ public class MazeGame {
 	}
 	
 	private static void setInputs(){				//0 = open block, 1 = closed block
-		
+		//Order: [0] = up, [1] = down, [2] = left, [3] = right, [4] = lastOutput
 		if(movePlayer(Constants.DIR_UP, pX, pY, map)){//if there is an open space above you
 			inputs[0] = 0;//0 = up
 		}else{//if there's not an open space above you
