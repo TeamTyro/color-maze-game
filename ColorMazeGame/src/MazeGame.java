@@ -525,58 +525,6 @@ public class MazeGame extends Applet {
 			}
 		}
 		
-		int x = Constants.MAP_WIDTH/2;
-		int y = 0;
-		out[x][y] = Constants.MAP_SPACE;
-		int lastDir = -1;
-		for(int i=0; i<20; i++) {
-			int dir = generator.nextInt(4);
-			int len = generator.nextInt(4);
-			while( (dir==0 && lastDir==3) || (dir==1 && lastDir == 2) || 
-					(dir==2 && lastDir==1) || (dir==3 && lastDir==0) ) {
-				dir = generator.nextInt(4);
-			}
-			switch (dir) {
-			case 0:		//Go down
-				for(int j=0; j<len; j++) {
-					if(y < Constants.MAP_WIDTH-1) {
-						y+=1;
-						out[x][y] = Constants.MAP_SPACE;
-					}
-				}
-				break;
-			case 1:		//Go right
-				for(int j=0; j<len; j++) {
-					if(x < Constants.MAP_HEIGHT-1) {
-						x+=1;
-						out[x][y] = Constants.MAP_SPACE;
-					}
-				}
-				break;
-			case 2:		//Go left
-				for(int j=0; j<len; j++) {
-					if(x > 0) {
-						x-=1;
-						out[x][y] = Constants.MAP_SPACE;
-					}
-				}
-				break;
-			case 3:		//Go up
-				for(int j=0; j<len; j++) {
-					if(y>0) {
-						y-=1;
-						out[x][y] = Constants.MAP_SPACE;
-					}
-				}
-				break;
-			default:
-				System.out.printf("Error: Unexpected random value in map gen. %d\n", dir);
-			}
-			lastDir = dir;
-		}
-		
-		out[x][y] = Constants.MAP_WIN;
-		
 		return out;
 	}
 	
