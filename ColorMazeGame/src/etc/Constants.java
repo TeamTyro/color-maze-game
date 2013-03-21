@@ -8,8 +8,8 @@ public class Constants {
 	public static final int DIR_DOWN = 4;
 	// Map space constants are returned by the map[] array
 	public static final int MAP_START = 4;
-	public static final int MAP_SPACE = 1;
-	public static final int MAP_BLOCK = 2;
+	public static final int MAP_SPACE = 0;
+	public static final int MAP_BLOCK = 1;
 	public static final int MAP_WIN = 3;
 	// Map property constants
 	public static final int MAP_WIDTH = 16;

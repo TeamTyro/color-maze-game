@@ -24,11 +24,13 @@ public class ReadSolutions {
 	public static int sY;				//The y start position of the player
 	public static Constants constant = new Constants();
 	
-	public ReadSolutions(String map){
-		mapnumber = map;
+	public ReadSolutions(String mapx){
+		mapnumber = mapx;											//the name of the map file.
+		map = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
+		getmapArray();
 		System.out.println("////SOLUTION READER////");
 		solutions = readSolutions();	//Sets the solutions array to all of the data in the text file. solutions[solution#] = String of solution
-		gemapArray();
+		
 	}
 	
 	public static String[] readSolutions(){
@@ -96,14 +98,14 @@ public class ReadSolutions {
 	
 	public double[] getSituation(String solution, int move){							//Gets the inputs at the time that a particular move was performed, in the String solution.
 		
-		int[] situation = new int[5];	//Order: [0] = up, [1] = down, [2] = left, [3] = right, [4] = lastOutput. 0 = open block, 1 = filled block.
+		double[] situation = new double[5];	//Order: [0] = up, [1] = down, [2] = left, [3] = right, [4] = lastOutput. 0 = open block, 1 = filled block.
 		
 		int rightMoves = 0;
 		int leftMoves = 0;
 		int upMoves = 0;
 		int downMoves = 0;
 		
-		for(int m = 0; m < solution.length()-move; m++){
+		for(int m = 0; m < move; m++){
 			if(solution.charAt(m) == 'r'){	rightMoves += 1;}
 			if(solution.charAt(m) == 'l'){	leftMoves += 1;	}
 			if(solution.charAt(m) == 'u'){	upMoves += 1;	}
@@ -112,13 +114,34 @@ public class ReadSolutions {
 		int pX = sX + (rightMoves - leftMoves);	//finds the player position at that time.
 		int pY = sY + (downMoves  - upMoves	);	//Finds the player position at that time.
 		
+		if(pY + 1 < Constants.MAP_HEIGHT){	//If you're not at the bottom of the map.
+			situation[1] = map[pX][pY+1];	//below you
+		}else{ situation[1] = Constants.MAP_BLOCK;	}	
 		
-		situation[0] = map[pX][pY-1];	//above you
-		situation[1] = map[pX][pY+1];	//below you
-		situation[2] = map[pX-1][pY];		//left of you
-		situation[3] = map[pX+1][pY];		//right of you
-		situation[4] = ;
+		if(pY - 1 > 0){						//If you're not at the top of the map.
+			situation[0] = map[pX][pY-1];	//above you
+		}else{	situation[0] = Constants.MAP_BLOCK;}	
+		
+		if(pX + 1 < Constants.MAP_WIDTH){	//If you're not at the right edge of the map.
+			situation[3] = map[pX+1][pY];	//right of you
+		}else{	situation[3] = Constants.MAP_BLOCK;}	
+		
+		if(pX - 1 > 0){						//If you're not at the left edge of the map.	
+			situation[2] = map[pX-1][pY];	//left of you
+		}else{	situation[2] = Constants.MAP_BLOCK;}	
+		
 
+		
+		if(move > 0){								//Finds the last move
+			situation[4] = solution.charAt(move-1);
+		}else{
+			situation[4] = -1;
+		}
+		
+		System.out.println("Solution: " +solution);
+		System.out.println("Move: "+move+" "+solution.charAt(move)+" "+"	Up: "+situation[0]+"	Down: "+situation[1]+"	Left: "+situation[2]+"	Right: "+situation[3]+"	LastMove: "+(char) (int)situation[4]);
+		System.out.println("pXpY("+pX+","+pY+")"+"	pXpY("+sX+","+sY+")");
+		return situation;
 	}
 	
 	public double[][] getOutputs(){	//The output array is set inside of the getInputs(percent) method.
@@ -127,13 +150,13 @@ public class ReadSolutions {
 	
 	public static void getmapArray(){	//Sets the map[][] array to the same map[][] array in the main MazeGame.
 		m.loadMap(mapnumber);	//loads the map.
-		
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {		
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
 				map[x][y] = m.getSpace(x,y);
 				if(map[x][y] == Constants.MAP_START) {
 					sX = x;
 					sY = y;
+					System.out.println("Player X: "+sX+"	Player Y: "+sY);
 				}
 			}
 		}	

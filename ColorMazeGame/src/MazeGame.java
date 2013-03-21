@@ -44,14 +44,14 @@ public class MazeGame {
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		ai = new NeuralNetwork(5, 4, 4, .03f, runs, mapnumber);
+		//ai = new NeuralNetwork(5, 4, 4, .03f, runs, mapnumber);
 		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
 		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
 		
 		resetMap();		//sets map up.
 		
 		printMaze(map);	//prints map on console
-		
+		ai = new NeuralNetwork(5, 4, 4, .03f, runs, mapnumber);
 		begin();
 	}
 	
