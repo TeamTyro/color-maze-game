@@ -42,6 +42,8 @@ public class DataParser {
 			data = data.concat(pack.getSurvey(i));
 			data = data.concat("|");
 		}
+		
+		System.out.printf("%s", data);
 	}
 	
 	public String getData() {

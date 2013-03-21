@@ -30,10 +30,26 @@ public class InfoPackage {
 	}
 	
 	public void setSurvey(String s_AgeRange, String s_Ethnicity, String s_Profession, String s_Email) {
-		AgeRange = s_AgeRange;
-		Ethnicity = s_Ethnicity;
-		Profession = s_Profession;
-		Email = s_Email;
+		if(s_AgeRange != null) {
+			AgeRange = s_AgeRange;
+		} else {
+			AgeRange = "ERROR: No good parameter";
+		}
+		if(s_Ethnicity != null) {
+			Ethnicity = s_Ethnicity;
+		} else {
+			Ethnicity = "ERROR: No good parameter";
+		}
+		if(s_Profession != null) {
+			Profession = s_Profession;
+		} else {
+			Profession = "ERROR: No good parameter";
+		}
+		if(s_Email != null) {
+			Email = s_Email;
+		} else {
+			Email = "---";
+		}
 	}
 	
 	public int [] getActions() {
