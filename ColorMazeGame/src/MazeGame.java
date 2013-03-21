@@ -147,7 +147,7 @@ public class MazeGame extends Applet {
 		MazeMap maze = new MazeMap();
 		URL mapURL;
 		try {
-			mapURL = new URL("http://jackketcham.com/teamtyro/game/map1.txt");
+			mapURL = new URL("http://teamtyro.com/game/map1.txt");
 			maze.loadMap(mapURL);
 		} catch(MalformedURLException ex) {
 			ErrorReport e = new ErrorReport(ex.getMessage());
