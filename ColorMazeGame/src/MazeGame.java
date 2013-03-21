@@ -42,7 +42,7 @@ public class MazeGame extends Applet {
 	boolean running;
 	Thread gameThread;
 	
-	boolean showDiagonal = false;
+	boolean showDiagonal = true;
 	
 	/** Function startLWJGL()
 	 * Executes LWJGL's startup methods.
