@@ -513,9 +513,7 @@ public class MazeGame extends Applet {
 	}
 	
 	/** Function makeMaze()
-	 * Randomly creates a maze by drawing lines of a random
-	 * direction and size and returns a two dimensional
-	 * array with the map information.
+	 * Initiates the maze.
 	 */
 	private int[][] makeMaze() {
 		int [][] out = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
