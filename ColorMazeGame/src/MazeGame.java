@@ -51,7 +51,7 @@ public class MazeGame {
 		resetMap();		//sets map up.
 		
 		printMaze(map);	//prints map on console
-		ai = new NeuralNetwork(5, 4, 4, .03f, runs, mapnumber);
+		ai = new NeuralNetwork(5, 4, 4, .02f, runs, mapnumber);
 		begin();
 	}
 	

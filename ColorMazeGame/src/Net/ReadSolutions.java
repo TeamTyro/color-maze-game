@@ -18,7 +18,7 @@ public class ReadSolutions {
 	public static int solutionsCount;
 	public static MazeMap m = new MazeMap();
 	public static int[][] map;
-	public Random r = new Random(1);
+	public Random r = new Random(2);
 	public static String mapnumber;
 	public static int sX;				//The x start position of the player
 	public static int sY;				//The y start position of the player
@@ -138,9 +138,9 @@ public class ReadSolutions {
 			situation[4] = -1;
 		}
 		
-		System.out.println("Solution: " +solution);
-		System.out.println("Move: "+move+" "+solution.charAt(move)+" "+"	Up: "+situation[0]+"	Down: "+situation[1]+"	Left: "+situation[2]+"	Right: "+situation[3]+"	LastMove: "+(char) (int)situation[4]);
-		System.out.println("pXpY("+pX+","+pY+")"+"	pXpY("+sX+","+sY+")");
+		//System.out.println("Solution: " +solution);
+		//System.out.println("Move: "+move+" "+solution.charAt(move)+" "+"	Up: "+situation[0]+"	Down: "+situation[1]+"	Left: "+situation[2]+"	Right: "+situation[3]+"	LastMove: "+(char) (int)situation[4]);
+		//System.out.println("pXpY("+pX+","+pY+")"+"	pXpY("+sX+","+sY+")");
 		return situation;
 	}
 	

@@ -30,9 +30,9 @@ public class NeuralNetwork {
 	final double learningRate = 0.9f;
 	final double momentum = 0.7f;
 	// Inputs for xor problem
-	public double inputs[][] = { { 1, 1 }, { 1, 0 }, { 0, 1 }, { 0, 0 } };					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
+	public double[][] inputs;					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 	// Corresponding outputs, xor training data
-	public double expectedOutputs[][];// = { { 0,0,0,1}, { 0,0,1,0}, { 0,1,0,0 }, { 1,0,0,0} };	//
+	public double[][] expectedOutputs;// = { { 0,0,0,1}, { 0,0,1,0}, { 0,1,0,0 }, { 1,0,0,0} };	//
 	double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1} }; 							// dummy init. Try messing around with it(?)
 	double output[];
 	// for weight update all
@@ -45,6 +45,12 @@ public class NeuralNetwork {
 		r = new ReadSolutions(map);
 		
 		inputs = 	r.getInputs(percent);	//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		expectedOutputs = new double[inputs.length][4];
+		for(int i = 0; i < expectedOutputs.length; i++){
+			for(int j = 0; j < expectedOutputs[i].length; j++){
+				expectedOutputs[i][j] = 0;
+			}
+		}
 		expectedOutputs = 	r.getOutputs();
 		
 		this.layers = new int[] { input, hidden, output };
