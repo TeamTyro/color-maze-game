@@ -5,7 +5,7 @@ import etc.Constants;
 public class InfoPackage {
 	private static java.util.Date d_start, d_end;
 	private static int [] _actions;
-	private static String AgeRange, Ethnicity, Profession, Email;
+	private static String name, email, gender, age;
 	
 	public InfoPackage () {
 		_actions = new int [500];
@@ -29,26 +29,26 @@ public class InfoPackage {
 		}
 	}
 	
-	public void setSurvey(String s_AgeRange, String s_Ethnicity, String s_Profession, String s_Email) {
-		if(s_AgeRange != null) {
-			AgeRange = s_AgeRange;
+	public void setSurvey(String s_name, String s_email, String s_gender, String s_age) {
+		if(s_name != null) {
+			name = s_name;
 		} else {
-			AgeRange = "ERROR: No good parameter";
+			name = "ERROR: No good parameter";
 		}
-		if(s_Ethnicity != null) {
-			Ethnicity = s_Ethnicity;
+		if(s_email != null) {
+			email = s_email;
 		} else {
-			Ethnicity = "ERROR: No good parameter";
+			email = "ERROR: No good parameter";
 		}
-		if(s_Profession != null) {
-			Profession = s_Profession;
+		if(s_gender != null) {
+			gender = s_gender;
 		} else {
-			Profession = "ERROR: No good parameter";
+			gender = "ERROR: No good parameter";
 		}
-		if(s_Email != null) {
-			Email = s_Email;
+		if(s_age != null) {
+			age = s_age;
 		} else {
-			Email = "---";
+			age = "---";
 		}
 	}
 	
@@ -67,13 +67,13 @@ public class InfoPackage {
 	public String getSurvey(int which) {
 		switch(which) {
 		case 0:
-			return AgeRange;
+			return name;
 		case 1:
-			return Ethnicity;
+			return email;
 		case 2:
-			return Profession;
+			return gender;
 		case 3:
-			return Email;
+			return age;
 		}
 		
 		return "";
