@@ -36,7 +36,7 @@ public class SendData implements Runnable {
 		
 		// Make URL to receiving PHP file
 		try {
-		    url = new URL("http://jackketcham.com/teamtyro/ext/recieve.php");
+		    url = new URL("http://teamtyro.com/ext/recieve.php");
 		} catch (MalformedURLException e) {
 		    e.printStackTrace();
 		}
