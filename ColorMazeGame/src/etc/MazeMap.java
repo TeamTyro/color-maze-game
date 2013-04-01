@@ -1,7 +1,5 @@
 package etc;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -15,6 +13,27 @@ public class MazeMap {
 	
 	public int getSpace(int s_x, int s_y) {
 		return map[s_x][s_y];
+	}
+	
+	public void loadConstMap(String sMap) {
+		for(int y=0; y<Constants.MAP_HEIGHT; y++) {
+			for(int x=0; x<Constants.MAP_WIDTH; x++) {
+				switch(sMap.charAt(x+(y*Constants.MAP_WIDTH))) {
+				case 'b':
+					map[x][y] = Constants.MAP_BLOCK;
+					break;
+				case 'c':
+					map[x][y] = Constants.MAP_SPACE;
+					break;
+				case 's':
+					map[x][y] = Constants.MAP_START;
+					break;
+				case 'w':
+					map[x][y] = Constants.MAP_WIN;
+					break;
+				}
+			}
+		}
 	}
 	
 	public boolean loadMap(URL s_fileURL) {

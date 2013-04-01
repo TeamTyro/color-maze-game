@@ -143,16 +143,21 @@ public class MazeGame extends Applet {
 		
 		startDate = new java.util.Date();
 		
-		// This section temporarily removed
 		MazeMap maze = new MazeMap();
-		URL mapURL;
+		/*URL mapURL;
 		try {
 			mapURL = new URL("http://teamtyro.com/game/map1.txt");
 			maze.loadMap(mapURL);
 		} catch(MalformedURLException ex) {
 			ErrorReport e = new ErrorReport(ex.getMessage());
 			e.makeFile();
-		}
+		}*/
+		
+		maze.loadConstMap("cbbbccccccccbbbbcccccbbbbbbcbbbbcbbbcbsbccbcbbbbcccbccc" +
+				"bccccbbbbcbcbbbcbbbcbbbbbcbcbbbcbcccbbbbbcccccccccbbbbbbbcbbbbbbb" +
+				"bbbcbbbbccccccccccbcbbbbbbbbbcbbbcccbbbbcccbbcccccccbbbbcbccccbcc" +
+				"cbcbbbbcbbbbbbcbcbcbbbbcbwcccbcbcbcbbbbcbbbbcbbbcbcbbbbcccccccccc" +
+				"ccbbbb");
 		
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
