@@ -33,7 +33,7 @@ public class NeuralNetwork {
 	public double[][] inputs;					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 	// Corresponding outputs, xor training data
 	public double[][] expectedOutputs;// = { { 0,0,0,1}, { 0,0,1,0}, { 0,1,0,0 }, { 1,0,0,0} };	//
-	double resultOutputs[][] = { { -1 }, { -1 }, { -1 }, { -1} }; 							// dummy init. Try messing around with it(?)
+	double resultOutputs[][];
 	double output[];
 	// for weight update all
 	final HashMap<String, Double> weightUpdate = new HashMap<String, Double>();
@@ -45,13 +45,14 @@ public class NeuralNetwork {
 		r = new ReadSolutions(map);
 		
 		inputs = 	r.getInputs(percent);	//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
-		expectedOutputs = new double[inputs.length][4];
+		expectedOutputs = new double[inputs.length][2];
+		resultOutputs = new double[inputs.length][2];
 		for(int i = 0; i < expectedOutputs.length; i++){
 			for(int j = 0; j < expectedOutputs[i].length; j++){
 				expectedOutputs[i][j] = 0;
 			}
 		}
-		expectedOutputs = 	r.getOutputs();
+		expectedOutputs = r.getOutputs();
 		
 		this.layers = new int[] { input, hidden, output };
 		df = new DecimalFormat("#.0#");
@@ -143,11 +144,28 @@ public class NeuralNetwork {
 		if (i == maxSteps) {
 			System.out.println("!Error training try again");
 		} else {
-			printAllWeights();
-			printWeightUpdate();
+			//printAllWeights();
+			//printWeightUpdate();
+			System.out.println("TotalRuns: "+i);
 		}
+	
 	}
 
+	public int testNet(double[] in){	//Runs an input array through the net, converts the output neurons to 0=up; 1=down; 2=left; 3=right.
+		int o = -1;
+		
+		setInput(in);							//Sets each input neuron x to input[p][x] (sets each neuron to the current input set)
+		activate();										//Goes through each hidden and output layer neuron, and calculates output
+
+		output = getOutput();							//returns output[], an array holding the output of each neuron.	
+
+		for(int i = 0; i < output.length; i++){
+			System.out.println(output[i]);
+		}
+		
+		return o;
+	}
+	
 	double getRandom() {	//Gets random number between -1 and 1
 		return randomWeightMultiplier * (rand.nextDouble() * 2 - 1); // [-1;1[
 	}

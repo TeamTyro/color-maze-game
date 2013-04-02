@@ -74,8 +74,8 @@ public class ReadSolutions {
 
 	public double[][] getInputs(float percent){											//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 		double inputs[][] = new double[((int) (percent*totalMoves))][5];				//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
+		outputs = new double[((int) (percent*totalMoves))][2];
 		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
-		
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
 		while(solutionsRecorded < inputs.length){										//While the array has not been fully filled.
 		
@@ -84,6 +84,7 @@ public class ReadSolutions {
 					if(r.nextFloat() < percent && solutionsRecorded < inputs.length){	//If it randomly chooses it, then record that input.
 						//System.out.println(""+solutions[s].charAt(l));
 						inputs[solutionsRecorded] = getSituation(solutions[s], l);		//Gets the inputs at the time that that situation was recorded.
+						outputs[solutionsRecorded] = getOutputNumber(solutions[s].charAt(l));		//Records the given output (move) for that situation in the solution string.
 						solutionsRecorded++;
 						
 						break;
@@ -132,8 +133,12 @@ public class ReadSolutions {
 		
 
 		
-		if(move > 0){								//Finds the last move
+		if(move > 0){								//Finds the last move. Is recorded as: 0 =u; 1/3=d; 2/3=l; 1=r
 			situation[4] = solution.charAt(move-1);
+			if(solution.charAt(move-1) == 'u'){	situation[4] = 0;}
+			if(solution.charAt(move-1) == 'd'){	situation[4] = .3;}
+			if(solution.charAt(move-1) == 'l'){	situation[4] = .6;}
+			if(solution.charAt(move-1) == 'r'){	situation[4] = 1;}
 		}else{
 			situation[4] = -1;
 		}
@@ -144,11 +149,35 @@ public class ReadSolutions {
 		return situation;
 	}
 	
-	public double[][] getOutputs(){	//The output array is set inside of the getInputs(percent) method.
+	public double[][] getOutputs(){			//The output array is set inside of the getInputs(percent) method.
 		return outputs;
 	}
 	
-	public static void getmapArray(){	//Sets the map[][] array to the same map[][] array in the main MazeGame.
+	public double[] getOutputNumber(char outputnumber){	//Gets the number version of the output letter.		0,0=u;	0,1=ed;	1,0=l;	1,1=r
+		double[] out = new double[2];
+		
+		if(outputnumber == 'u'){
+			out[0] = 0;
+			out[1] = 0;
+		}
+		if(outputnumber == 'd'){
+			out[0] = 0;
+			out[1] = 1;
+		}
+		if(outputnumber == 'l'){
+			out[0] = 1;
+			out[1] = 0;
+		}
+		if(outputnumber == 'r'){
+			out[0] = 1;
+			out[1] = 1;
+		}
+		
+		return out;
+		
+	}
+	
+	public static void getmapArray(){		//Sets the map[][] array to the same map[][] array in the main MazeGame.
 		m.loadMap(mapnumber);	//loads the map.
 		for(int x=0; x<Constants.MAP_WIDTH; x++) {		
 			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
