@@ -5,7 +5,7 @@ import etc.Constants;
 public class InfoPackage {
 	private static java.util.Date d_start, d_end;
 	private static int [] _actions;
-	private static String name, email, gender, age;
+	private static String name, email, gender, age, ethnicity;
 	
 	public InfoPackage () {
 		_actions = new int [500];
@@ -29,7 +29,7 @@ public class InfoPackage {
 		}
 	}
 	
-	public void setSurvey(String s_name, String s_email, String s_gender, String s_age) {
+	public void setSurvey(String s_name, String s_email, String s_gender, String s_age, String s_ethnicity) {
 		if(s_name != null) {
 			name = s_name;
 		} else {
@@ -49,6 +49,11 @@ public class InfoPackage {
 			age = s_age;
 		} else {
 			age = "---";
+		}
+		if(s_ethnicity != null) {
+			ethnicity = s_ethnicity;
+		} else {
+			ethnicity = "ERROR: No good parameter";
 		}
 	}
 	

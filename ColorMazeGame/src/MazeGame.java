@@ -512,7 +512,8 @@ public class MazeGame extends Applet {
 		out.setSurvey(	getParameter("name"),
 						getParameter("email"),
 						getParameter("gender"),
-						getParameter("age") );
+						getParameter("age"),
+						getParameter("ethnicity") );
 		
 		return out;
 	}
