@@ -79,6 +79,8 @@ public class InfoPackage {
 			return gender;
 		case 3:
 			return age;
+		case 4:
+			return ethnicity;
 		}
 		
 		return "";
