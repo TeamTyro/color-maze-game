@@ -8,8 +8,6 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Random;
 
 import org.lwjgl.LWJGLException;
@@ -25,7 +23,6 @@ import etc.MazeMap;
 
 public class MazeGame extends Applet {
 	private static final long serialVersionUID = 1L;
-	private static Random generator = new Random();
 	private static int[][] map;			// Universal map array 
 	
 	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]
@@ -144,14 +141,6 @@ public class MazeGame extends Applet {
 		startDate = new java.util.Date();
 		
 		MazeMap maze = new MazeMap();
-		/*URL mapURL;
-		try {
-			mapURL = new URL("http://teamtyro.com/game/map1.txt");
-			maze.loadMap(mapURL);
-		} catch(MalformedURLException ex) {
-			ErrorReport e = new ErrorReport(ex.getMessage());
-			e.makeFile();
-		}*/
 		
 		maze.loadConstMap("cbbbccccccccbbbbcccccbbbbbbcbbbbcbbbcbsbccbcbbbbcccbccc" +
 				"bccccbbbbcbcbbbcbbbcbbbbbcbcbbbcbcccbbbbbcccccccccbbbbbbbcbbbbbbb" +
