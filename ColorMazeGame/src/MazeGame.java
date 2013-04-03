@@ -8,10 +8,10 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.util.Random;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
@@ -134,11 +134,9 @@ public class MazeGame extends Applet {
 		keyRefresh = new boolean [6];
 		
 		recActions = new int [500];
-		operation = 0;
+		operation = 3;
 		
 		currentAction = 0;
-		
-		startDate = new java.util.Date();
 		
 		MazeMap maze = new MazeMap();
 		
@@ -170,6 +168,8 @@ public class MazeGame extends Applet {
 		GL11.glLoadIdentity();
 		GL11.glOrtho(-300, 300, -300, 300, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
 	
 	/** Function begin()
@@ -202,6 +202,20 @@ public class MazeGame extends Applet {
 				}
 			} else if(operation == 2) {
 				// Test is over
+			} else if(operation == 3) {
+				// Wait for user to start testing
+				GL11.glColor4d(0.0, 0.0, 0.0, 0.5);
+				GL11.glBegin(GL11.GL_QUADS);
+					GL11.glVertex2f(-300,  300);
+					GL11.glVertex2f( 300,  300);
+					GL11.glVertex2f( 300, -300);
+					GL11.glVertex2f(-300, -300);
+				GL11.glEnd();
+				
+				if(Mouse.isButtonDown(0)) {
+					operation = 0;
+					startDate = new java.util.Date();
+				}
 			}
 
 			Display.update();
