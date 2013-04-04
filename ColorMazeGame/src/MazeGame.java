@@ -102,6 +102,8 @@ public class MazeGame extends Applet {
 	 * Initializes the canvas and global variables
 	 */
 	public void init() {
+		System.out.printf("TestGame V0.8.0\n");
+		
 		setLayout(new BorderLayout());
 		try {
 			display_parent = new Canvas() {
@@ -155,8 +157,6 @@ public class MazeGame extends Applet {
 				}
 			}
 		}
-		
-		printMaze(map);
 	}
 	
 	/** Function initGL()
@@ -528,39 +528,5 @@ public class MazeGame extends Applet {
 		}
 		
 		return out;
-	}
-	
-	/** Function printMaze(int[][] tmap)
-	 * Prints the given map as text.
-	 */
-	private void printMaze(int[][] tmap) {
-		for(int x=0; x<Constants.MAP_WIDTH+2; x++) {
-			System.out.printf("[-]");
-		}
-		System.out.println("");
-		for (int y = 0; y < Constants.MAP_WIDTH; y++) {
-			System.out.printf("[|]");
-			for (int x = 0; x < Constants.MAP_HEIGHT; x++) {
-				switch (tmap[x][y]) {
-				case Constants.MAP_START:
-					System.out.printf(" s ");
-				case Constants.MAP_BLOCK:
-					System.out.printf("[ ]");
-					break;
-				case Constants.MAP_SPACE:
-					System.out.printf("   ");
-					break;
-				case Constants.MAP_WIN:
-					System.out.printf(" w ");
-				}
-			}
-			System.out.printf("[|]");
-			System.out.println("");
-		}
-		for(int x=0; x<Constants.MAP_WIDTH+2; x++) {
-			System.out.printf("[-]");
-		}
-		
-		System.out.printf("\n");
 	}
 }

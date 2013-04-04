@@ -37,8 +37,6 @@ public class DataParser {
 		}
 		
 		data = data.concat("|");
-		
-		System.out.printf("%s", data);
 	}
 	
 	public String getData() {
