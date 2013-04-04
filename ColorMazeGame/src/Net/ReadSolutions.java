@@ -91,15 +91,18 @@ public class ReadSolutions {
 						for(int i = 0; i < inputs.length; i++){							//Goes through each input set, and checks that there has not been an equivalent marked down yet.
 							int copy = 0;
 							for(int j = 0; j < inputs[i].length; j++){					//Goes through each set of inputs from an input set
+								if(inputs[i][j] != test[j]){
+									break;
+								}
 								if(inputs[i][j] == test[j]){
 									copy += 1;
 								}
-								if(copy == inputs[i].length){
-									isOriginal = false;
-									break;
-								}
+
 							}
-							
+							if(copy == inputs[i].length){
+								isOriginal = false;
+								break;
+							}
 						}
 						if(isOriginal){
 							inputs[solutionsRecorded] = getSituation(solutions[s], l);		//Gets the inputs at the time that that situation was recorded.
@@ -142,7 +145,7 @@ public class ReadSolutions {
 		
 		if(pY - 1 > 0){						//If you're not at the top of the map.
 			situation[0] = map[pX][pY-1];	//above you
-			if(situation[0] == Constants.MAP_START){ situation[0] = .5; }
+			if(situation[0] == Constants.MAP_START){ situation[0] = 0; }
 		}else{	situation[0] = Constants.MAP_BLOCK;}	
 		
 		if(pX + 1 < Constants.MAP_WIDTH){	//If you're not at the right edge of the map.
@@ -155,14 +158,14 @@ public class ReadSolutions {
 		
 
 		
-		if(move > 0){								//Finds the last move. Is recorded as: NO LAST MOVE = 0 .25 =u; .5=d; .75=l; 1=r
+		if(move > 0){								//Finds the last move. Is recorded as: NO LAST MOVE = 0; 0 =u; 1/3=d; 2/3=l; 1=r
 			situation[4] = solution.charAt(move-1);
-			if(solution.charAt(move-1) == 'u'){	situation[4] = .25;}
-			if(solution.charAt(move-1) == 'd'){	situation[4] = .5;}
-			if(solution.charAt(move-1) == 'l'){	situation[4] = .75;}
-			if(solution.charAt(move-1) == 'r'){	situation[4] = 1;}
+			if(solution.charAt(move-1) == 'u'){	situation[4] = -4;}
+			if(solution.charAt(move-1) == 'd'){	situation[4] = 2;}
+			if(solution.charAt(move-1) == 'l'){	situation[4] = 0;}
+			if(solution.charAt(move-1) == 'r'){	situation[4] = 6;}
 		}else{
-			situation[4] = 0;
+			situation[4] = -4;
 		}
 		
 		//System.out.println("Solution: " +solution);

@@ -27,8 +27,8 @@ public class NeuralNetwork {
 
 	final double epsilon = 0.00000000001;
 
-	final double learningRate = 0.9f;
-	final double momentum = 0.7f;
+	final double learningRate = 0.9999f;
+	final double momentum = 0.98f;
 	// Inputs for xor problem
 	public double[][] inputs;					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 	// Corresponding outputs, xor training data
@@ -111,7 +111,7 @@ public class NeuralNetwork {
 			updateAllWeights();
 		}
 		
-		double minErrorCondition = 0.001;
+		double minErrorCondition = 0.3;
 		run(maxRuns, minErrorCondition);
 	}
 

@@ -28,7 +28,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	private static int pX, pY;				// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
-	public static int runs = 				125000;			//total runs to train the AI
+	public static int runs = 				100000;			//total runs to train the AI
 	public static int frameSpeed = 			25;			//how many miliseconds per frame
 	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 50;
@@ -51,7 +51,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		resetMap();		//sets map up.
 		
 		printMaze(map);	//prints map on console
-		ai = new NeuralNetwork(5,25, 2, .07f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
+		ai = new NeuralNetwork(5,12, 2, .08f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
 		System.out.println("Finished Training");
 		begin();
 	}
