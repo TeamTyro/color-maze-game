@@ -5,7 +5,6 @@ import etc.Constants;
 public class InfoPackage {
 	private static java.util.Date d_start, d_end;
 	private static int [] _actions;
-	private static String name, email, gender, age, ethnicity;
 	
 	public InfoPackage () {
 		_actions = new int [500];
@@ -29,34 +28,6 @@ public class InfoPackage {
 		}
 	}
 	
-	public void setSurvey(String s_name, String s_email, String s_gender, String s_age, String s_ethnicity) {
-		if(s_name != null) {
-			name = s_name;
-		} else {
-			name = "ERROR: No good parameter";
-		}
-		if(s_email != null) {
-			email = s_email;
-		} else {
-			email = "ERROR: No good parameter";
-		}
-		if(s_gender != null) {
-			gender = s_gender;
-		} else {
-			gender = "ERROR: No good parameter";
-		}
-		if(s_age != null) {
-			age = s_age;
-		} else {
-			age = "---";
-		}
-		if(s_ethnicity != null) {
-			ethnicity = s_ethnicity;
-		} else {
-			ethnicity = "ERROR: No good parameter";
-		}
-	}
-	
 	public int [] getActions() {
 		return _actions;
 	}
@@ -67,22 +38,5 @@ public class InfoPackage {
 		} else {
 			return d_end;
 		}
-	}
-	
-	public String getSurvey(int which) {
-		switch(which) {
-		case 0:
-			return name;
-		case 1:
-			return email;
-		case 2:
-			return gender;
-		case 3:
-			return age;
-		case 4:
-			return ethnicity;
-		}
-		
-		return "";
 	}
 }
