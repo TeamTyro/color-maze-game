@@ -23,12 +23,12 @@ import etc.MazeMap;
 
 public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	//			Pre-Genetic Algorithm Code				//
-	private static Random generator = new Random();
+	private static Random generator = new Random(1);
 	private static int[][] map;				// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
 	private static int pX, pY;				// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
-	public static int runs = 				500000;			//total runs to train the AI
+	public static int runs = 				125000;			//total runs to train the AI
 	public static int frameSpeed = 			25;			//how many miliseconds per frame
 	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 50;
@@ -51,7 +51,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		resetMap();		//sets map up.
 		
 		printMaze(map);	//prints map on console
-		ai = new NeuralNetwork(5,8, 2, .05f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
+		ai = new NeuralNetwork(5,25, 2, .07f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
 		System.out.println("Finished Training");
 		begin();
 	}
@@ -65,7 +65,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		while(!Display.isCloseRequested()) {	// Start main loop
 			
 			System.out.println("Test mode activated");
-			System.out.println("0,0=up	0,1=down	1,0=left	1,1=right	LastOutput:	u=0; d=.3; l=.6; r=1");
+			System.out.println("0,0=up	0,1=down	1,0=left	1,1=right	LastOutput:	NONE = 0; u=.25; d=.5; l=.75; r=1");
 			double in0 = readInfo("BLock above: ");
 			double in1	= readInfo("Block below: ");
 			double in2 = readInfo("Block left: ");

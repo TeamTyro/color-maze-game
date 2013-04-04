@@ -17,7 +17,7 @@ public class NeuralNetwork {
 
 	final boolean isTrained = false;
 	final DecimalFormat df;
-	final Random rand = new Random();
+	final Random rand = new Random(1);
 	final ArrayList<Neuron> inputLayer = new ArrayList<Neuron>();
 	final ArrayList<Neuron> hiddenLayer = new ArrayList<Neuron>();
 	final ArrayList<Neuron> outputLayer = new ArrayList<Neuron>();
@@ -132,7 +132,6 @@ public class NeuralNetwork {
 					double err = Math.pow(output[j] - expectedOutputs[p][j], 2);
 					error += err;
 				}
-
 				applyBackpropagation(expectedOutputs[p]);
 			}
 		}
@@ -142,7 +141,7 @@ public class NeuralNetwork {
 		System.out.println("Sum of squared errors = " + error);
 		System.out.println("##### EPOCH " + i+"\n");
 		if (i == maxSteps) {
-			System.out.println("!Error training try again");
+			System.out.println("!Error training try again, maxed steps");
 		} else {
 			//printAllWeights();
 			//printWeightUpdate();

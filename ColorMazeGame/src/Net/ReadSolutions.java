@@ -18,7 +18,7 @@ public class ReadSolutions {
 	public static int solutionsCount;
 	public static MazeMap m = new MazeMap();
 	public static int[][] map;
-	public Random r = new Random(2);
+	public Random r = new Random(1);
 	public static String mapnumber;
 	public static int sX;				//The x start position of the player
 	public static int sY;				//The y start position of the player
@@ -75,17 +75,37 @@ public class ReadSolutions {
 	public double[][] getInputs(float percent){											//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 		double inputs[][] = new double[((int) (percent*totalMoves))][5];				//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
 		outputs = new double[((int) (percent*totalMoves))][2];
-		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
+		
+		
+		
 		while(solutionsRecorded < inputs.length){										//While the array has not been fully filled.
 		
 			for(int s = 0; s < solutions.length; s++){									//Goes through each move of each solution, picking at random (percent) intervals an input to record.
 				for(int l = 0; l < solutions[s].length(); l++){							//Goes through the entire string of that particular solution.
 					if(r.nextFloat() < percent && solutionsRecorded < inputs.length){	//If it randomly chooses it, then record that input.
+					
 						//System.out.println(""+solutions[s].charAt(l));
-						inputs[solutionsRecorded] = getSituation(solutions[s], l);		//Gets the inputs at the time that that situation was recorded.
-						outputs[solutionsRecorded] = getOutputNumber(solutions[s].charAt(l));		//Records the given output (move) for that situation in the solution string.
-						solutionsRecorded++;
+						double[] test = getSituation(solutions[s], l);
+						boolean isOriginal = true;										//Holds wether or not the new solution datapoint is a new, original, datapoint.
+						for(int i = 0; i < inputs.length; i++){							//Goes through each input set, and checks that there has not been an equivalent marked down yet.
+							int copy = 0;
+							for(int j = 0; j < inputs[i].length; j++){					//Goes through each set of inputs from an input set
+								if(inputs[i][j] == test[j]){
+									copy += 1;
+								}
+								if(copy == inputs[i].length){
+									isOriginal = false;
+									break;
+								}
+							}
+							
+						}
+						if(isOriginal){
+							inputs[solutionsRecorded] = getSituation(solutions[s], l);		//Gets the inputs at the time that that situation was recorded.
+							outputs[solutionsRecorded] = getOutputNumber(solutions[s].charAt(l));		//Records the given output (move) for that situation in the solution string.
+							solutionsRecorded++;
+						}
 						
 						break;
 					}
@@ -93,6 +113,7 @@ public class ReadSolutions {
 			}
 			
 		}
+		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
 		
 		return inputs;
 	}
@@ -121,6 +142,7 @@ public class ReadSolutions {
 		
 		if(pY - 1 > 0){						//If you're not at the top of the map.
 			situation[0] = map[pX][pY-1];	//above you
+			if(situation[0] == Constants.MAP_START){ situation[0] = .5; }
 		}else{	situation[0] = Constants.MAP_BLOCK;}	
 		
 		if(pX + 1 < Constants.MAP_WIDTH){	//If you're not at the right edge of the map.
@@ -133,14 +155,14 @@ public class ReadSolutions {
 		
 
 		
-		if(move > 0){								//Finds the last move. Is recorded as: 0 =u; 1/3=d; 2/3=l; 1=r
+		if(move > 0){								//Finds the last move. Is recorded as: NO LAST MOVE = 0 .25 =u; .5=d; .75=l; 1=r
 			situation[4] = solution.charAt(move-1);
-			if(solution.charAt(move-1) == 'u'){	situation[4] = 0;}
-			if(solution.charAt(move-1) == 'd'){	situation[4] = .3;}
-			if(solution.charAt(move-1) == 'l'){	situation[4] = .6;}
+			if(solution.charAt(move-1) == 'u'){	situation[4] = .25;}
+			if(solution.charAt(move-1) == 'd'){	situation[4] = .5;}
+			if(solution.charAt(move-1) == 'l'){	situation[4] = .75;}
 			if(solution.charAt(move-1) == 'r'){	situation[4] = 1;}
 		}else{
-			situation[4] = -1;
+			situation[4] = 0;
 		}
 		
 		//System.out.println("Solution: " +solution);
