@@ -73,8 +73,9 @@ public class ReadSolutions {
 	}
 
 	public double[][] getInputs(float percent){											//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
-		double inputs[][] = new double[((int) (percent*totalMoves))][5];				//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
-		outputs = new double[((int) (percent*totalMoves))][2];
+		int solutionsToRecord = ((int) (percent*totalMoves));
+		double inputs[][] = new double[solutionsToRecord][5];							//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
+		outputs = new double[solutionsToRecord][2];
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
 		
 		
@@ -83,8 +84,8 @@ public class ReadSolutions {
 		
 			for(int s = 0; s < solutions.length; s++){									//Goes through each move of each solution, picking at random (percent) intervals an input to record.
 				for(int l = 0; l < solutions[s].length(); l++){							//Goes through the entire string of that particular solution.
-					if(r.nextFloat() < percent && solutionsRecorded < inputs.length){	//If it randomly chooses it, then record that input.
 					
+					if(r.nextFloat() < percent && solutionsRecorded < inputs.length){	//If it randomly chooses it, then record that input.
 						//System.out.println(""+solutions[s].charAt(l));
 						double[] test = getSituation(solutions[s], l);
 						boolean isOriginal = true;										//Holds wether or not the new solution datapoint is a new, original, datapoint.
@@ -107,7 +108,7 @@ public class ReadSolutions {
 						if(isOriginal){
 							inputs[solutionsRecorded] = getSituation(solutions[s], l);		//Gets the inputs at the time that that situation was recorded.
 							outputs[solutionsRecorded] = getOutputNumber(solutions[s].charAt(l));		//Records the given output (move) for that situation in the solution string.
-							solutionsRecorded++;
+							solutionsRecorded += 1;
 						}
 						
 						break;
