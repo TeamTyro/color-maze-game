@@ -33,7 +33,7 @@ public class MazeGame {
 	//			Variables that you can change			//
 	public static int runs = 				50;			//total runs
 	//public static int generations = 		10;			//total generations
-	public static int frameSpeed = 			350;			//how many miliseconds per frame
+	public static int frameSpeed = 			1;			//how many miliseconds per frame
 	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock =	10;			//the max amount of time an AI is allowed to repeat on a block, before it quits out.
 	
@@ -53,11 +53,7 @@ public class MazeGame {
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
-		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
-		fitness = new int[4];
-		recActions = new int [500];
-		startDate = new java.util.Date();
+		gameRestart();
 		
 		resetMap();		//sets map up.
 		
@@ -71,11 +67,17 @@ public class MazeGame {
 	 */
 	private static void begin() {		
 		setUpScreen();		
-		ai = new GeneticAlgorithm(runs);
-		String mapSolution = new String(learnMap());
-		System.out.println(mapSolution);
+		//ai = new GeneticAlgorithm(runs);
+		//String mapSolution = new String(learnMap());
+		//System.out.println(mapSolution);
 		
 		while(!Display.isCloseRequested()) {	// Start main loop
+			gameRestart();
+			resetMap();		
+			ai = new GeneticAlgorithm(runs);
+			String mapSolution = new String(learnMap());
+			System.out.println(mapSolution);
+			
 			int currentMove = 0;
 			resetMap();	
 			while(!Display.isCloseRequested() && map[pX][pY] != Constants.MAP_WIN){	//While showing the recorded solution, and it has not finished yet.
@@ -90,11 +92,19 @@ public class MazeGame {
 					Display.destroy();
 				}
 			}
-			
+			//currentMove = 0;
 			sleep(frameSpeed*10);	//Shows it at the endpoint for a little bit.
 		}			
 		//end of while loop, when display closes.
 		Display.destroy();
+	}
+	
+	private static void gameRestart(){
+		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
+		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
+		fitness = new int[4];
+		recActions = new int [500];
+		startDate = new java.util.Date();
 	}
 	
 	private static String learnMap(){

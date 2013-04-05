@@ -8,7 +8,7 @@ public class GeneticAlgorithm {
 	public static int[] output;
 	public static int lastOutput;					//goes into solution[][][][][][lastOutput], and tracks the last move. Is set to -1 until the bot moves.
 	public static int[] runFitness;	//gets the fitness for all the runs. [runs]
-	public Random random = new Random(1);			//the # in parenthesis is the seed for the random numbers
+	public Random random = new Random();			//the # in parenthesis is the seed for the random numbers
 	
 	public GeneticAlgorithm(int runsCount){			//sets up runs and the input array
 		
