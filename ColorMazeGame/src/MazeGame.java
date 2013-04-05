@@ -8,6 +8,13 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.ByteBuffer;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -34,6 +41,8 @@ public class MazeGame extends Applet {
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
 	private static int pX, pY;			// Player x and y (within the map array)
+	
+	private static int [] texIDs;
 	
 	Canvas display_parent;
 	boolean running;
@@ -98,6 +107,35 @@ public class MazeGame extends Applet {
 		super.destroy();
 	}
 	
+	private void loadTex() {
+		URL testTex = this.getClass().getClassLoader().getResource("test.png");
+		if(testTex == null) {
+			System.out.printf("ERROR: Could not load texture!\n");
+		}
+		BufferedImage img;
+		try {
+			img = ImageIO.read(testTex.openStream());
+		} catch(IOException ex) {
+			System.out.printf("ERROR: Reading img in BufferedImage\n");
+			return;
+		}
+		ByteBuffer buf = ByteBuffer.allocateDirect(4 * 64 * 64);
+		//int [] tempIntImg = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+		byte [] tempByteImg = new byte [16384];
+		tempByteImg = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
+		/*for(int i=0; i<64*64; i+=4) {
+			byte[] fourBytes = ByteBuffer.allocate(4).putInt(tempIntImg[i]).array();
+			for(int j=0; j<4; j++) {
+				tempByteImg[i+j] = fourBytes[j];
+			}
+		}*/
+		buf.put(tempByteImg);
+		texIDs[0] = GL11.glGenTextures();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texIDs[0]);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, 64, 64, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
+        
+	}
+	
 	/** Function init()
 	 * Initializes the canvas and global variables
 	 */
@@ -128,6 +166,8 @@ public class MazeGame extends Applet {
 			e.makeFile();
 			throw new RuntimeException("Unable to create display!");
 		}
+		
+		texIDs = new int [10];
 		
 		map = makeMaze();
 		
@@ -170,6 +210,8 @@ public class MazeGame extends Applet {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		
+		loadTex();
 	}
 	
 	/** Function begin()
@@ -211,6 +253,15 @@ public class MazeGame extends Applet {
 					GL11.glVertex2f( 300, -300);
 					GL11.glVertex2f(-300, -300);
 				GL11.glEnd();
+				
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+				GL11.glBegin(GL11.GL_QUADS);
+					GL11.glVertex2f(-20, 20);	GL11.glTexCoord2d(0, 1);
+					GL11.glVertex2f( 20, 20);	GL11.glTexCoord2d(1, 1);
+					GL11.glVertex2f( 20,-20);	GL11.glTexCoord2d(1, 0);
+					GL11.glVertex2f(-20,-20);	GL11.glTexCoord2d(0, 0);
+				GL11.glEnd();
+				
 				
 				if(Mouse.isButtonDown(0)) {
 					operation = 0;
