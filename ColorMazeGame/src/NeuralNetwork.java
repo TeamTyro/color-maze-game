@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 
+import etc.Constants;
+
 import Net.ReadSolutions;
 import Net.Connection;
 import Net.Neuron;
@@ -111,7 +113,7 @@ public class NeuralNetwork {
 			updateAllWeights();
 		}
 		
-		double minErrorCondition = 0.3;
+		double minErrorCondition = 0.001;
 		run(maxRuns, minErrorCondition);
 	}
 
@@ -150,7 +152,7 @@ public class NeuralNetwork {
 	
 	}
 
-	public int testNet(double[] in){	//Runs an input array through the net, converts the output neurons to 0=up; 1=down; 2=left; 3=right.
+	public int testNet(double[] in){	//Runs an input array through the net, converts the output neurons to 0=up; 1=down; 2=left; 3=right.//returns a number between 0 and 3 for the solution set
 		int o = -1;
 		
 		setInput(in);							//Sets each input neuron x to input[p][x] (sets each neuron to the current input set)
@@ -161,7 +163,11 @@ public class NeuralNetwork {
 		for(int i = 0; i < output.length; i++){
 			System.out.println(output[i]);
 		}
-		
+		if(output[0] < .5 && output[1] < .5){ o = Constants.DIR_DOWN;}//11 = u; 00 = d; 10 = l; 01 = r
+		if(output[0] > .5 && output[1] > .5){ o = Constants.DIR_UP;}
+		if(output[0] > .5 && output[1] < .5){ o = Constants.DIR_LEFT;}
+		if(output[0] < .5 && output[1] > .5){ o = Constants.DIR_RIGHT;}
+		System.out.println(o);
 		return o;
 	}
 	

@@ -28,17 +28,18 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	private static int pX, pY;				// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
-	public static int runs = 				100000;			//total runs to train the AI
+	public static int runs = 				10000;			//total runs to train the AI
 	public static int frameSpeed = 			25;			//how many miliseconds per frame
 	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 50;
 	//			Non Changable Variables 				//
-	public static int[] inputs = new int[5];//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
+	public static double[] inputs = new double[5];//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
 	public static int[][] mapCount;			//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
 	public static NeuralNetwork ai; 		//is set up in the begin method
 	public static boolean ranIntoWall = false;
 	public static boolean hasWonGame = false;	
 	public static String mapnumber = "map1.txt";	//What map the AI will be learning.
+	public static int lastOutput;;
 	/* Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
@@ -51,8 +52,8 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		resetMap();		//sets map up.
 		
 		printMaze(map);	//prints map on console
-		ai = new NeuralNetwork(5,12, 2, .08f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
-		System.out.println("Finished Training");
+		//ai = new NeuralNetwork(5,14, 2, .012f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
+		//System.out.println("Finished Training");
 		begin();
 	}
 	
@@ -63,19 +64,34 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		setUpScreen();		
 		
 		while(!Display.isCloseRequested()) {	// Start main loop
+			lastOutput = Constants.DIR_UP;
+			ai = new NeuralNetwork(5,14, 2, .012f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
+			System.out.println("Finished Training");
 			
-			System.out.println("Test mode activated");
-			System.out.println("0,0=up	0,1=down	1,0=left	1,1=right	LastOutput:	NONE = 0; u=.25; d=.5; l=.75; r=1");
-			double in0 = readInfo("BLock above: ");
-			double in1	= readInfo("Block below: ");
-			double in2 = readInfo("Block left: ");
-			double in3	= readInfo("Block right: ");
-			double in4 = readInfo("Last move: ");
-			double[] in = {in0,in1,in2,in3,in4};
-			ai.testNet(in);
+			while(!Display.isCloseRequested()) {	
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer	
+				render();
+				
+				setInputs();
+				checkKeys();
+				sleep(frameSpeed);
+				Display.update();
+			}
 		}			
 		//end of while loop, when display closes.
 		Display.destroy();
+	}
+	
+	private static void askNet(){					//Purely for net testing purposes. 
+		System.out.println("Test mode activated");
+		System.out.println("0,0=up	0,1=down	1,0=left	1,1=right");
+		double in0 = readInfo("BLock above: ");
+		double in1	= readInfo("Block below: ");
+		double in2 = readInfo("Block left: ");
+		double in3	= readInfo("Block right: ");
+		double in4 = readInfo("Last move: ");
+		double[] in = {in0,in1,in2,in3,in4};
+		ai.testNet(in);
 	}
 	
 	private static void resetMap(){
@@ -96,7 +112,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		}	
 	}
 	
-	private static double readInfo(String prompt){		//Tool for reading lines from console
+	private static double readInfo(String prompt){			//Tool for reading lines from console
 		
 		//System.out.printf(prompt + "\n");//prompt
 		System.out.printf(prompt);//prompt
@@ -116,11 +132,12 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		return -10000;
 	}
 	
-	private static String checkKeys(int run) {		//Reads for key input and acts accordingly. Player is moved from arrow key presses.
-		int action = ai.getOutput(run, inputs);
+	private static String checkKeys() {						//Reads for key input and acts accordingly. Player is moved from arrow key presses.
+		int action = ai.testNet(inputs);					//returns a number between 0 and 3 for the solution set
+		lastOutput = action;
 		String move = "";
-		if( action == 0 ) {//if output says go up
-			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {//checks if you can or can't move into that space
+		if( action == 0 ) {									//if output says go up
+			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {	//checks if you can or can't move into that space
 				pY--;
 				//recActions[moveCount] = Constants.DIR_UP;
 				moveCount++;
@@ -189,6 +206,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		}else{
 			inputs[3] = 1;//3 = right
 		}
+		inputs[4] = lastOutput;
 	}
 
 	private static boolean continueRun(){

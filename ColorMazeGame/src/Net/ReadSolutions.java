@@ -77,11 +77,10 @@ public class ReadSolutions {
 		double inputs[][] = new double[solutionsToRecord][5];							//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
 		outputs = new double[solutionsToRecord][2];
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
-		
+		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
 		
 		
 		while(solutionsRecorded < inputs.length){										//While the array has not been fully filled.
-		
 			for(int s = 0; s < solutions.length; s++){									//Goes through each move of each solution, picking at random (percent) intervals an input to record.
 				for(int l = 0; l < solutions[s].length(); l++){							//Goes through the entire string of that particular solution.
 					
@@ -146,7 +145,7 @@ public class ReadSolutions {
 		
 		if(pY - 1 > 0){						//If you're not at the top of the map.
 			situation[0] = map[pX][pY-1];	//above you
-			if(situation[0] == Constants.MAP_START){ situation[0] = 0; }
+			if(situation[0] == Constants.MAP_START){ situation[0] = Constants.MAP_SPACE; }
 		}else{	situation[0] = Constants.MAP_BLOCK;}	
 		
 		if(pX + 1 < Constants.MAP_WIDTH){	//If you're not at the right edge of the map.
@@ -182,20 +181,20 @@ public class ReadSolutions {
 	public double[] getOutputNumber(char outputnumber){	//Gets the number version of the output letter.		0,0=u;	0,1=ed;	1,0=l;	1,1=r
 		double[] out = new double[2];
 		
-		if(outputnumber == 'u'){
-			out[0] = 0;
-			out[1] = 0;
+		if(outputnumber == 'u'){//11 = u; 00 = d; 10 = l; 01 = r
+			out[0] = 1;
+			out[1] = 1;
 		}
 		if(outputnumber == 'd'){
 			out[0] = 0;
-			out[1] = 1;
+			out[1] = 0;
 		}
 		if(outputnumber == 'l'){
 			out[0] = 1;
 			out[1] = 0;
 		}
 		if(outputnumber == 'r'){
-			out[0] = 1;
+			out[0] = 0;
 			out[1] = 1;
 		}
 		
