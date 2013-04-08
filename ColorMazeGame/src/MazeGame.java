@@ -8,6 +8,7 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.text.SimpleDateFormat;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -30,7 +31,8 @@ public class MazeGame extends Applet {
 	private static int rCurrentAction;	// Replay current action, just for replaying
 	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
-		
+	private static java.text.SimpleDateFormat sTime, eTime;
+	
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
 	private static int pX, pY;			// Player x and y (within the map array)
@@ -193,6 +195,9 @@ public class MazeGame extends Applet {
 				checkKeys();
 				if(map[pX][pY] == Constants.MAP_WIN) {
 					endDate = new java.util.Date();
+					SimpleDateFormat sdf;
+					sdf = new SimpleDateFormat("hh:mm:ss:SS");
+					eTime = sdf.format(endDate);
 					SendData sender = new SendData(packUp(startDate, endDate, recActions));
 					(new Thread(sender)).start();
 					
@@ -228,6 +233,9 @@ public class MazeGame extends Applet {
 				if(Mouse.isButtonDown(0)) {
 					operation = 0;
 					startDate = new java.util.Date();
+					SimpleDateFormat sdf;
+					sdf = new SimpleDateFormat("hh:mm:ss:SS");
+					sTime = sdf.format(startDate);
 				}
 			}
 			
