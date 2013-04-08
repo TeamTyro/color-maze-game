@@ -19,7 +19,7 @@ public class NeuralNetwork {
 
 	final boolean isTrained = false;
 	final DecimalFormat df;
-	final Random rand = new Random(1);
+	final Random rand = new Random(5);
 	final ArrayList<Neuron> inputLayer = new ArrayList<Neuron>();
 	final ArrayList<Neuron> hiddenLayer = new ArrayList<Neuron>();
 	final ArrayList<Neuron> outputLayer = new ArrayList<Neuron>();
@@ -29,8 +29,8 @@ public class NeuralNetwork {
 
 	final double epsilon = 0.00000000001;
 
-	final double learningRate = 0.9999f;
-	final double momentum = 0.98f;
+	final double learningRate = 0.89f;
+	final double momentum = 0.97f;
 	// Inputs for xor problem
 	public double[][] inputs;					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 	// Corresponding outputs, xor training data
@@ -42,19 +42,11 @@ public class NeuralNetwork {
 	//The following is modifications that I have made to the program.
 	ReadSolutions r;
 
-	public NeuralNetwork(int input, int hidden, int output, float percent, int maxRuns, String map) {
+	public NeuralNetwork(int input, int hidden, int output,double[][] inputSet,double[][] outputSet, int maxRuns, String map) {
 		
-		r = new ReadSolutions(map);
-		
-		inputs = 	r.getInputs(percent);	//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
-		expectedOutputs = new double[inputs.length][2];
+		inputs = inputSet;
+		expectedOutputs = outputSet;
 		resultOutputs = new double[inputs.length][2];
-		for(int i = 0; i < expectedOutputs.length; i++){
-			for(int j = 0; j < expectedOutputs[i].length; j++){
-				expectedOutputs[i][j] = 0;
-			}
-		}
-		expectedOutputs = r.getOutputs();
 		
 		this.layers = new int[] { input, hidden, output };
 		df = new DecimalFormat("#.0#");
@@ -113,7 +105,7 @@ public class NeuralNetwork {
 			updateAllWeights();
 		}
 		
-		double minErrorCondition = 0.001;
+		double minErrorCondition = 0.1;
 		run(maxRuns, minErrorCondition);
 	}
 
@@ -161,12 +153,15 @@ public class NeuralNetwork {
 		output = getOutput();							//returns output[], an array holding the output of each neuron.	
 
 		for(int i = 0; i < output.length; i++){
-			System.out.println(output[i]);
+			System.out.println((double) output[i]);
 		}
-		if(output[0] < .5 && output[1] < .5){ o = Constants.DIR_DOWN;}//11 = u; 00 = d; 10 = l; 01 = r
-		if(output[0] > .5 && output[1] > .5){ o = Constants.DIR_UP;}
-		if(output[0] > .5 && output[1] < .5){ o = Constants.DIR_LEFT;}
-		if(output[0] < .5 && output[1] > .5){ o = Constants.DIR_RIGHT;}
+		
+		double half = (double) (Constants.positive+Constants.negative)/2;
+		
+		if(output[0] < half && output[1] < half){ o = Constants.DIR_DOWN;	}//11 = u; 00 = d; 10 = l; 01 = r
+		if(output[0] > half && output[1] > half){ o = Constants.DIR_UP;		}
+		if(output[0] > half && output[1] < half){ o = Constants.DIR_LEFT;	}
+		if(output[0] < half && output[1] > half){ o = Constants.DIR_RIGHT;	}
 		System.out.println(o);
 		return o;
 	}

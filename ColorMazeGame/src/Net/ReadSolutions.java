@@ -18,7 +18,7 @@ public class ReadSolutions {
 	public static int solutionsCount;
 	public static MazeMap m = new MazeMap();
 	public static int[][] map;
-	public Random r = new Random(1);
+	public Random r = new Random(3);
 	public static String mapnumber;
 	public static int sX;				//The x start position of the player
 	public static int sY;				//The y start position of the player
@@ -78,6 +78,12 @@ public class ReadSolutions {
 		outputs = new double[solutionsToRecord][2];
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
 		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
+		
+		for(int i =0; i< inputs.length; i++){
+			for(int j=0; j < inputs[i].length; j++){
+				inputs[i][j] = -10;
+			}
+		}
 		
 		
 		while(solutionsRecorded < inputs.length){										//While the array has not been fully filled.
@@ -154,22 +160,23 @@ public class ReadSolutions {
 		
 		if(pX - 1 > 0){						//If you're not at the left edge of the map.	
 			situation[2] = map[pX-1][pY];	//left of you
+			//if(situation[2] == Constants.MAP_WIN){ situation[2] = Constants.MAP_SPACE; }
 		}else{	situation[2] = Constants.MAP_BLOCK;}	
 		
 
 		
 		if(move > 0){								//Finds the last move. Is recorded as: NO LAST MOVE = 0; 0 =u; 1/3=d; 2/3=l; 1=r
 			situation[4] = solution.charAt(move-1);
-			if(solution.charAt(move-1) == 'u'){	situation[4] = -4;}
-			if(solution.charAt(move-1) == 'd'){	situation[4] = 2;}
-			if(solution.charAt(move-1) == 'l'){	situation[4] = 0;}
-			if(solution.charAt(move-1) == 'r'){	situation[4] = 6;}
+			if(solution.charAt(move-1) == 'u'){	situation[4] = Constants.DIR_UP;}
+			if(solution.charAt(move-1) == 'd'){	situation[4] = Constants.DIR_DOWN;}
+			if(solution.charAt(move-1) == 'l'){	situation[4] = Constants.DIR_LEFT;}
+			if(solution.charAt(move-1) == 'r'){	situation[4] = Constants.DIR_RIGHT;}
 		}else{
-			situation[4] = -4;
+			situation[4] = Constants.DIR_UP;
 		}
 		
 		//System.out.println("Solution: " +solution);
-		//System.out.println("Move: "+move+" "+solution.charAt(move)+" "+"	Up: "+situation[0]+"	Down: "+situation[1]+"	Left: "+situation[2]+"	Right: "+situation[3]+"	LastMove: "+(char) (int)situation[4]);
+		//System.out.println("Move: "+move+" "+solution.charAt(move)+" "+"	Up: "+situation[0]+"	Down: "+situation[1]+"	Left: "+situation[2]+"	Right: "+situation[3]+"	LastMove: "+situation[4]);
 		//System.out.println("pXpY("+pX+","+pY+")"+"	pXpY("+sX+","+sY+")");
 		return situation;
 	}
@@ -182,20 +189,20 @@ public class ReadSolutions {
 		double[] out = new double[2];
 		
 		if(outputnumber == 'u'){//11 = u; 00 = d; 10 = l; 01 = r
-			out[0] = 1;
-			out[1] = 1;
+			out[0] = Constants.positive;
+			out[1] = Constants.positive;
 		}
 		if(outputnumber == 'd'){
-			out[0] = 0;
-			out[1] = 0;
+			out[0] = Constants.negative;
+			out[1] = Constants.negative;
 		}
 		if(outputnumber == 'l'){
-			out[0] = 1;
-			out[1] = 0;
+			out[0] = Constants.positive;
+			out[1] = Constants.negative;
 		}
 		if(outputnumber == 'r'){
-			out[0] = 0;
-			out[1] = 1;
+			out[0] = Constants.negative;
+			out[1] = Constants.positive;
 		}
 		
 		return out;

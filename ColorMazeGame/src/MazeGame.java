@@ -17,38 +17,43 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
+import Net.ReadSolutions;
+
 import sql.InfoPackage;
 import etc.Constants;
 import etc.MazeMap;
 
 public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	//			Pre-Genetic Algorithm Code				//
-	private static Random generator = new Random(1);
-	private static int[][] map;				// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
-	private static int pX, pY;				// Player x and y (within the map array)
+	private static Random generator = new Random(5);
+	private static int[][] map;							// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
+	private static int pX, pY;							// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
-	public static int runs = 				10000;			//total runs to train the AI
-	public static int frameSpeed = 			25;			//how many miliseconds per frame
-	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
-	public static int maxRepeatsonBlock = 50;
+	public static int runs = 				30000;		//total runs to train the AI
+	public static int frameSpeed = 			250;			//how many miliseconds per frame
+	//public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
+	public static int maxRepeatsonBlock = 	3;			//What the max repeats on a block will be, before the AI quits out of the map and retrys.
+	public static float percentSolutions = 	.012f;		//What percent of the mapSolutions data points to teach the AI. 1 = 100%
+	public static int hiddenLayers = 		12;			//How many hidden layers the ANN will have.
 	//			Non Changable Variables 				//
-	public static double[] inputs = new double[5];//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
-	public static int[][] mapCount;			//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
-	public static NeuralNetwork ai; 		//is set up in the begin method
+	public static double[] inputs = new double[5];		//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
+	public static double[][] inputSet;					//Is filled in by ReadSolution. It holds all the data points (expanded) from the mapSolutions file.
+	public static double[][] outputSet;
+	public static int[][] mapCount;						//counts how many times the player has been on a particular block in the map. If he has passed the same block +10 times, the run is quit.
+	public static NeuralNetwork ai; 					//is set up in the begin method
+	public static ReadSolutions r;						//sets up the ReadSolutions to use with AI
 	public static boolean ranIntoWall = false;
 	public static boolean hasWonGame = false;	
-	public static String mapnumber = "map1.txt";	//What map the AI will be learning.
-	public static int lastOutput;;
+	public static String mapnumber = "map1.txt";		//What map the AI will be learning.
+	public static String finalSolution = "";
+	public static int lastOutput;
 	/* Function main(String args[])
 	 * Runs maze creation, sets some variables, and starts
 	 * the main loop.
 	 */
 	public static void main(String args[]) {
-		//ai = new NeuralNetwork(5, 4, 4, .03f, runs, mapnumber);
-		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
-		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
-		
+
 		resetMap();		//sets map up.
 		
 		printMaze(map);	//prints map on console
@@ -64,22 +69,79 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		setUpScreen();		
 		
 		while(!Display.isCloseRequested()) {	// Start main loop
-			lastOutput = Constants.DIR_UP;
-			ai = new NeuralNetwork(5,14, 2, .012f, runs, mapnumber);			//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
-			System.out.println("Finished Training");
-			
-			while(!Display.isCloseRequested()) {	
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer	
-				render();
-				
-				setInputs();
-				checkKeys();
-				sleep(frameSpeed);
-				Display.update();
-			}
+
+			resetMap();
+			findSolution();
 		}			
 		//end of while loop, when display closes.
 		Display.destroy();
+	}
+	
+	private static void findSolution(){
+		
+		r = new ReadSolutions(mapnumber);
+		inputSet = 	r.getInputs(percentSolutions);										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		outputSet = new double[inputSet.length][2];										//Creates new outputSet
+		for(int i = 0; i < outputSet.length; i++){										//Clears outputSet
+			for(int j = 0; j < outputSet[i].length; j++){
+				outputSet[i][j] = 0;
+			}
+		}
+		outputSet = r.getOutputs();														//Finds the corrosponding outputSet to the inputSet
+		ai = new NeuralNetwork(5,hiddenLayers, 2, inputSet,outputSet, runs, mapnumber);	//Starts and trains the net. Format: (Inputs,Hidden,Outputs,% data to train, max cycles to train, map)
+		
+		lastOutput = Constants.DIR_UP;
+		finalSolution = "";
+		while(!Display.isCloseRequested()) {	
+			if(stuckInLoop()){						//If stuck, reset everything and try again.
+				System.out.println("Stuck");
+				deleteBadInput(findBadInput());
+				resetMapCount();
+				break;
+			}
+			if(map[pX][pY] == Constants.MAP_WIN){	//If it has won game, break out of the while loop
+				System.out.println(finalSolution);
+				System.out.println("Solved");
+				sleep(1500);
+				break;
+			}
+			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer	
+			render();
+			
+			setInputs();
+			finalSolution += checkKeys();		
+			sleep(frameSpeed);
+			Display.update();
+		}
+
+	}
+	
+	private static deleteBadInput(int badInput){
+		double[][] inputX = new double[inputSet.length-1][inputSet[0].length];			//Makes a copy inputsetArray that is one less large than the original inputSet array
+		double[][] outputX = new double[outputSet.length-1][outputSet[0].length];
+		
+		
+		inputSet = 	r.getInputs(percentSolutions);										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		outputSet = new double[inputSet.length][2];										//Creates new outputSet
+	}
+	
+	private static int findBadInput(){
+		int badInput = -1;										//This will hold the number of the array of inputSet that holds the bad set of inputs, which got the neural network stuck in the maze.
+		for(int i = 0; i < inputSet.length; i++){				//Goes through each inputset, and finds the one that the player is currently at. (If it even exists)
+			//boolean isOriginal = true;						//is it an original copy? True until proven false.
+			int counter = 0;
+			for(int j = 0; j < inputSet[i].length; j++){		//checks if the current inputs is equal to the current inputs in the current inputSet
+				if(inputSet[i][j] != inputs[j]){break;}			//if it is original, break out of checking.
+				if(inputSet[i][j] == inputs[j]){counter += 1;}	//if the counter ends up being equal to inputs.length, then the whole input is a copy, thus it is the input that got the program stuck.		
+				
+			}
+			if(counter == inputs.length){
+				badInput = i;
+				break;
+			}
+		}
+		
+		return badInput;
 	}
 	
 	private static void askNet(){					//Purely for net testing purposes. 
@@ -94,7 +156,18 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		ai.testNet(in);
 	}
 	
+	private static void resetMapCount(){			//Resets JUST the count of the map cells
+		for(int x=0; x<Constants.MAP_WIDTH; x++) {
+			for(int y=0; y<Constants.MAP_HEIGHT; y++) {
+				
+				mapCount[x][y] = 0;
+			}
+		}	
+	}
+	
 	private static void resetMap(){
+		map = new int [Constants.MAP_WIDTH][Constants.MAP_HEIGHT];		//sets array to map size
+		mapCount = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];	//sets array to map size
 		moveCount = 0;
 		ranIntoWall = false;
 		MazeMap maze = new MazeMap();//loads map from text file
@@ -136,7 +209,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		int action = ai.testNet(inputs);					//returns a number between 0 and 3 for the solution set
 		lastOutput = action;
 		String move = "";
-		if( action == 0 ) {									//if output says go up
+		if( action == Constants.DIR_UP ) {									//if output says go up
 			if(movePlayer(Constants.DIR_UP, pX, pY, map)) {	//checks if you can or can't move into that space
 				pY--;
 				//recActions[moveCount] = Constants.DIR_UP;
@@ -146,7 +219,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 				ranIntoWall = true;//If you're running into a wall, it ends the run.
 			}
 		}
-		if( action == 1 ) {//if output says go down
+		if( action == Constants.DIR_DOWN ) {//if output says go down
 			if(movePlayer(Constants.DIR_DOWN, pX, pY, map)) {
 				pY++;
 				//recActions[moveCount] = Constants.DIR_DOWN;
@@ -156,7 +229,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 				ranIntoWall = true;//If you're running into a wall, it ends the run.
 			}
 		}
-		if( action == 2 ) {//if output says go left
+		if( action == Constants.DIR_LEFT ) {//if output says go left
 			if(movePlayer(Constants.DIR_LEFT, pX, pY, map)) {
 				pX--;
 				//recActions[moveCount] = Constants.DIR_LEFT;
@@ -166,7 +239,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 				ranIntoWall = true;//If you're running into a wall, it ends the run.
 			}
 		}
-		if( action == 3 ) {//if output says go right
+		if( action == Constants.DIR_RIGHT ) {//if output says go right
 			if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)) {
 				pX++;
 				//recActions[moveCount] = Constants.DIR_RIGHT;
@@ -184,59 +257,32 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	private static void setInputs(){				//0 = open block, 1 = closed block
 		//Order: [0] = up, [1] = down, [2] = left, [3] = right, [4] = lastOutput
 		if(movePlayer(Constants.DIR_UP, pX, pY, map)){//if there is an open space above you
-			inputs[0] = 0;//0 = up
+			inputs[0] = Constants.MAP_SPACE;//0 = up
 		}else{//if there's not an open space above you
-			inputs[0] = 1;//1 = down
+			inputs[0] = Constants.MAP_BLOCK;//1 = down
 		}
 		
 		if(movePlayer(Constants.DIR_DOWN, pX, pY, map)){//if there's an open spot below you
-			inputs[1] = 0;//1 = down
+			inputs[1] = Constants.MAP_SPACE;//1 = down
 		}else{
-			inputs[1] = 1;//1 = down
+			inputs[1] = Constants.MAP_BLOCK;//1 = down
 		}
 		
 		if(movePlayer(Constants.DIR_LEFT, pX, pY, map)){//if there's an open spot left of you
-			inputs[2] = 0;//2 = left
+			inputs[2] = Constants.MAP_SPACE;//2 = left
 		}else{
-			inputs[2] = 1;//2 = left
+			inputs[2] = Constants.MAP_BLOCK;//2 = left
 		}
 		
 		if(movePlayer(Constants.DIR_RIGHT, pX, pY, map)){//if there's an open spot right of you
-			inputs[3] = 0;//3 = right
+			inputs[3] = Constants.MAP_SPACE;//3 = right
 		}else{
-			inputs[3] = 1;//3 = right
+			inputs[3] = Constants.MAP_BLOCK;//3 = right
 		}
 		inputs[4] = lastOutput;
 	}
-
-	private static boolean continueRun(){
-		
-		if(map[pX][pY] == Constants.MAP_WIN){
-			//System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: Won		"+"Moves: "+ moveCount+"	");
-			hasWonGame = true;
-			return false;
-			
-		}
-		
-		if(stuckInLoop()){
-			//System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: Stuck	"+"Moves: "+ moveCount+"	");
-			return false;
-		}
-		
-		if(ranIntoWall){
-			//System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: Wall	"+"Moves: "+ moveCount+"	");
-			return false;
-		}
-		
-		if(moveCount >= maxSolutionSize){
-			//System.out.print("RUN: "+run+"	Generation: "+generation+"	Reason: MaxMoves"+"Moves: "+ moveCount+"	");
-			return false;
-		}
-		
-		return true;
-	}
 	
-	private static boolean stuckInLoop(){			//returns true if the AI has passed the same block more than 10 times
+	private static boolean stuckInLoop(){			//returns true if the AI has passed the same block more than maxRepeatsonBlock times
 		if(mapCount[pX][pY] > maxRepeatsonBlock){
 			return true;
 		}else{
