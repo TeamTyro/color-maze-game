@@ -8,13 +8,6 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.ByteBuffer;
-
-import javax.imageio.ImageIO;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -41,8 +34,8 @@ public class MazeGame extends Applet {
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
 	private static int pX, pY;			// Player x and y (within the map array)
-	
-	private static int [] texIDs;
+	private static boolean xFlash;
+	private static int xFlashClock;
 	
 	Canvas display_parent;
 	boolean running;
@@ -107,35 +100,6 @@ public class MazeGame extends Applet {
 		super.destroy();
 	}
 	
-	private void loadTex() {
-		URL testTex = this.getClass().getClassLoader().getResource("test.png");
-		if(testTex == null) {
-			System.out.printf("ERROR: Could not load texture!\n");
-		}
-		BufferedImage img;
-		try {
-			img = ImageIO.read(testTex.openStream());
-		} catch(IOException ex) {
-			System.out.printf("ERROR: Reading img in BufferedImage\n");
-			return;
-		}
-		ByteBuffer buf = ByteBuffer.allocateDirect(4 * 64 * 64);
-		//int [] tempIntImg = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
-		byte [] tempByteImg = new byte [16384];
-		tempByteImg = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
-		/*for(int i=0; i<64*64; i+=4) {
-			byte[] fourBytes = ByteBuffer.allocate(4).putInt(tempIntImg[i]).array();
-			for(int j=0; j<4; j++) {
-				tempByteImg[i+j] = fourBytes[j];
-			}
-		}*/
-		buf.put(tempByteImg);
-		texIDs[0] = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texIDs[0]);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, 64, 64, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buf);
-        
-	}
-	
 	/** Function init()
 	 * Initializes the canvas and global variables
 	 */
@@ -167,7 +131,7 @@ public class MazeGame extends Applet {
 			throw new RuntimeException("Unable to create display!");
 		}
 		
-		texIDs = new int [10];
+		xFlashClock = 0;
 		
 		map = makeMaze();
 		
@@ -210,8 +174,6 @@ public class MazeGame extends Applet {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		
-		loadTex();
 	}
 	
 	/** Function begin()
@@ -266,6 +228,13 @@ public class MazeGame extends Applet {
 				if(Mouse.isButtonDown(0)) {
 					operation = 0;
 					startDate = new java.util.Date();
+				}
+			}
+			
+			if(xFlashClock > 0) {
+				xFlashClock--;
+				if(xFlashClock % 300 == 0) {
+					xFlash = !xFlash;
 				}
 			}
 
@@ -419,6 +388,26 @@ public class MazeGame extends Applet {
 			GL11.glVertex2f(x+100,y+100);
 			GL11.glVertex2f(x  +0,y+100);
 		GL11.glEnd();
+		
+		if(xFlash) {
+			GL11.glColor3f(1, 0, 0);
+			GL11.glBegin(GL11.GL_POLYGON);
+				GL11.glVertex2f(x+ 80, y+100);
+				GL11.glVertex2f(x+100, y+100);
+				GL11.glVertex2f(x+100, y+ 80);
+				GL11.glVertex2f(x+ 20, y+  0);
+				GL11.glVertex2f(x+  0, y+  0);
+				GL11.glVertex2f(x+  0, y+ 20);
+			GL11.glEnd();
+			GL11.glBegin(GL11.GL_POLYGON);
+				GL11.glVertex2f(x+  0, y+ 80);
+				GL11.glVertex2f(x+  0, y+100);
+				GL11.glVertex2f(x+ 20, y+100);
+				GL11.glVertex2f(x+100, y+ 20);
+				GL11.glVertex2f(x+100, y+  0);
+				GL11.glVertex2f(x+ 80, y+  0);
+			GL11.glEnd();
+		}
 	}
 	
 	/** Function setColor(int x, int y, int [][] tmap)
@@ -458,6 +447,8 @@ public class MazeGame extends Applet {
 				pY--;
 				recActions[currentAction] = Constants.DIR_UP;
 				currentAction++;
+			} else if(xFlashClock <= 0) {
+				xFlashClock = 1000;
 			}
 			keyRefresh[Constants.DIR_UP] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -469,6 +460,8 @@ public class MazeGame extends Applet {
 				pY++;
 				recActions[currentAction] = Constants.DIR_DOWN;
 				currentAction++;
+			} else if(xFlashClock <= 0) {
+				xFlashClock = 1000;
 			}
 			keyRefresh[Constants.DIR_DOWN] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
@@ -480,6 +473,8 @@ public class MazeGame extends Applet {
 				pX--;
 				recActions[currentAction] = Constants.DIR_LEFT;
 				currentAction++;
+			} else if(xFlashClock <= 0) {
+				xFlashClock = 1000;
 			}
 			keyRefresh[Constants.DIR_LEFT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
@@ -491,6 +486,8 @@ public class MazeGame extends Applet {
 				pX++;
 				recActions[currentAction] = Constants.DIR_RIGHT;
 				currentAction++;
+			} else if(xFlashClock <= 0) {
+				xFlashClock = 1000;
 			}
 			keyRefresh[Constants.DIR_RIGHT] = false;
 		} else if(!Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
