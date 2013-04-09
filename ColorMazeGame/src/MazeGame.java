@@ -31,7 +31,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	public static int moveCount = 0;
 	//			Variables that you can change			//
 	public static int runs = 				30000;		//total runs to train the AI
-	public static int frameSpeed = 			250;			//how many miliseconds per frame
+	public static int frameSpeed = 			50;			//how many miliseconds per frame
 	//public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 	3;			//What the max repeats on a block will be, before the AI quits out of the map and retrys.
 	public static float percentSolutions = 	.012f;		//What percent of the mapSolutions data points to teach the AI. 1 = 100%
@@ -116,10 +116,23 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 
 	}
 	
-	private static deleteBadInput(int badInput){
+	private static void deleteBadInput(int badInput){
 		double[][] inputX = new double[inputSet.length-1][inputSet[0].length];			//Makes a copy inputsetArray that is one less large than the original inputSet array
 		double[][] outputX = new double[outputSet.length-1][outputSet[0].length];
-		
+		boolean hasFoundBadInput = false;												//To keep order in the array, once it skips over the bad input it has to start copying into the cell of i-1,
+		for(int i = 0; i < inputSet.length; i++){										//Goes through input set, copying everything but the bad input into inputX
+			for(int j = 0; j < inputSet[0].length; j++){
+				if(hasFoundBadInput){
+					inputX[i][j] = inputSet[i+1][j];
+				}
+				if(hasFoundBadInput = false && i != badInput){
+					inputX[i][j] = inputSet[i][j];
+				}
+			}
+			if(i == badInput){
+				hasFoundBadInput = true;
+			}
+		}
 		
 		inputSet = 	r.getInputs(percentSolutions);										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
 		outputSet = new double[inputSet.length][2];										//Creates new outputSet
