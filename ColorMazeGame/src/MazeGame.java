@@ -203,12 +203,6 @@ public class MazeGame extends Applet {
 					SendData sender = new SendData(packUp(sTime, eTime, recActions));
 					(new Thread(sender)).start();
 					
-					try {
-						getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
-					} catch (MalformedURLException ex) {
-						System.out.println(ex.getMessage());
-					}
-					
 					operation = 2;
 				}
 			} else if(operation == 1) {
@@ -218,14 +212,15 @@ public class MazeGame extends Applet {
 					rCurrentAction++;
 				}
 			} else if(operation == 2) {
+				//Redirect player to thank you webpage
 				InfoPackage pack = new InfoPackage();
 				String tTime = pack.getTime();
 				try {
 					getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
-			   }
-			   catch (MalformedURLException ex) {
-			    	System.out.println(ex.getMessage());
-			   }
+				}
+				catch (MalformedURLException ex) {
+					System.out.println(ex.getMessage());
+				}
 			} else if(operation == 3) {
 				// Wait for user to start testing
 				GL11.glColor4d(0.0, 0.0, 0.0, 0.5);
