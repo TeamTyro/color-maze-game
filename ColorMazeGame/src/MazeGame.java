@@ -8,6 +8,8 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 
 import org.lwjgl.LWJGLException;
@@ -29,9 +31,9 @@ public class MazeGame extends Applet {
 	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]
 	private static int currentAction; 	// Keeps track of which part of recActions your using. Basically just a counter for recActions
 	private static int rCurrentAction;	// Replay current action, just for replaying
-	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
+	private static int operation;			// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
-	private static String sTime, eTime, tTime;
+	private static String sTime, eTime;
 	
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
@@ -210,7 +212,14 @@ public class MazeGame extends Applet {
 					rCurrentAction++;
 				}
 			} else if(operation == 2) {
-				// Test is over
+				InfoPackage pack = new InfoPackage();
+				String tTime = pack.getTime();
+				try {
+					getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
+			   }
+			   catch (MalformedURLException ex) {
+			    	System.out.println(ex.getMessage());
+			   }
 			} else if(operation == 3) {
 				// Wait for user to start testing
 				GL11.glColor4d(0.0, 0.0, 0.0, 0.5);
