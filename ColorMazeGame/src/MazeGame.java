@@ -203,6 +203,12 @@ public class MazeGame extends Applet {
 					SendData sender = new SendData(packUp(sTime, eTime, recActions));
 					(new Thread(sender)).start();
 					
+					try {
+						getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
+					} catch (MalformedURLException ex) {
+						System.out.println(ex.getMessage());
+					}
+					
 					operation = 2;
 				}
 			} else if(operation == 1) {
