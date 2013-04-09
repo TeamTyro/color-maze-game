@@ -31,7 +31,7 @@ public class MazeGame extends Applet {
 	private static int rCurrentAction;	// Replay current action, just for replaying
 	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
-	private static java.text.SimpleDateFormat sTime, eTime;
+	private static String sTime, eTime, tTime;
 	
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
@@ -196,9 +196,9 @@ public class MazeGame extends Applet {
 				if(map[pX][pY] == Constants.MAP_WIN) {
 					endDate = new java.util.Date();
 					SimpleDateFormat sdf;
-					sdf = new SimpleDateFormat("hh:mm:ss:SS");
+					sdf = new SimpleDateFormat("hh:mm:ss.SSS");
 					eTime = sdf.format(endDate);
-					SendData sender = new SendData(packUp(startDate, endDate, recActions));
+					SendData sender = new SendData(packUp(sTime, eTime, recActions));
 					(new Thread(sender)).start();
 					
 					operation = 2;
@@ -234,7 +234,7 @@ public class MazeGame extends Applet {
 					operation = 0;
 					startDate = new java.util.Date();
 					SimpleDateFormat sdf;
-					sdf = new SimpleDateFormat("hh:mm:ss:SS");
+					sdf = new SimpleDateFormat("hh:mm:ss.SSS");
 					sTime = sdf.format(startDate);
 				}
 			}
@@ -563,10 +563,10 @@ public class MazeGame extends Applet {
 	 * eD endDate
 	 * a=recActions*
 	 */
-	private InfoPackage packUp(java.util.Date sD, java.util.Date eD, int[] a) {
+	private InfoPackage packUp(String sTime, String eTime, int[] a) {
 		InfoPackage out = new InfoPackage();
 		
-		out.setDates(sD, eD);
+		out.setTimes(sTime, eTime);
 		out.setActions(a);
 		 
 		return out;

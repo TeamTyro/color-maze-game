@@ -12,9 +12,7 @@ public class DataParser {
 	
 	public DataParser(InfoPackage pack) {
 		data = "|";
-		data = data.concat(String.valueOf(pack.getDate(1)));
-		data = data.concat("|");
-		data = data.concat(String.valueOf(pack.getDate(2)));
+		data = data.concat(pack.getTime());
 		data = data.concat("|");
 		int [] actions = pack.getActions();
 		int index = 0;
