@@ -43,7 +43,7 @@ public class MazeGame extends Applet {
 	
 	Canvas display_parent;
 	boolean running;
-	Thread gameThread;
+	Thread gameThread, sendThread;
 	
 	boolean showDiagonal = true;
 	
@@ -201,13 +201,8 @@ public class MazeGame extends Applet {
 					sdf = new SimpleDateFormat("hh:mm:ss.SSS");
 					eTime = sdf.format(endDate);
 					SendData sender = new SendData(packUp(sTime, eTime, recActions));
-					(new Thread(sender)).start();
-					
-					try {
-						getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
-					} catch (MalformedURLException ex) {
-						System.out.println(ex.getMessage());
-					}
+					sendThread = new Thread(sender);
+					sendThread.start();
 					
 					operation = 2;
 				}
@@ -218,7 +213,17 @@ public class MazeGame extends Applet {
 					rCurrentAction++;
 				}
 			} else if(operation == 2) {
-				// Test is over
+				// Pending send
+				if(!sendThread.isAlive()) {
+					System.out.printf("Finished sending... Bringing to success page.\n");
+					try {
+						getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
+					} catch (MalformedURLException ex) {
+						System.out.println(ex.getMessage());
+					}
+					
+					operation = 4;
+				}
 			} else if(operation == 3) {
 				// Wait for user to start testing
 				GL11.glColor4d(0.0, 0.0, 0.0, 0.5);
@@ -245,6 +250,8 @@ public class MazeGame extends Applet {
 					sdf = new SimpleDateFormat("hh:mm:ss.SSS");
 					sTime = sdf.format(startDate);
 				}
+			} else if(operation == 4) {
+				// Everything's finished. Shut up and sit quietly
 			}
 			
 			if(xFlashClock > 0) {
