@@ -285,15 +285,6 @@ public class MazeGame extends Applet {
 					GL11.glVertex2f(-300, -300);
 				GL11.glEnd();
 				
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-				GL11.glBegin(GL11.GL_QUADS);
-					GL11.glVertex2f(-20, 20);	GL11.glTexCoord2d(0, 1);
-					GL11.glVertex2f( 20, 20);	GL11.glTexCoord2d(1, 1);
-					GL11.glVertex2f( 20,-20);	GL11.glTexCoord2d(1, 0);
-					GL11.glVertex2f(-20,-20);	GL11.glTexCoord2d(0, 0);
-				GL11.glEnd();
-				
-				
 				if(Mouse.isButtonDown(0)) {
 					operation = 0;
 					startDate = new java.util.Date();
