@@ -31,9 +31,9 @@ public class MazeGame extends Applet {
 	private static int [] recActions; 	// Stores all the keys pressed. [DIR_RIGHT,UP,DOWN,LEFT]
 	private static int currentAction; 	// Keeps track of which part of recActions your using. Basically just a counter for recActions
 	private static int rCurrentAction;	// Replay current action, just for replaying
-	private static int operation;		// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
+	private static int operation;			// The phase of the test. 0= moving around, playing game. 1= Replaying the game 2= Finished with testing, sending data.
 	private static java.util.Date startDate, endDate; // Actual day, time, milliseconds that you played the game.
-	private static String sTime, eTime, tTime;
+	private static String sTime, eTime;
 	
 	private static boolean [] keyRefresh;	//Makes sure that holding a button won't machine-gun it. [true=its up, and can be pressed. False=it's being pressed]
 	
@@ -208,8 +208,11 @@ public class MazeGame extends Applet {
 					sdf = new SimpleDateFormat("hh:mm:ss.SSS");
 					eTime = sdf.format(endDate);
 					SendData sender = new SendData(packUp(sTime, eTime, recActions));
+					
 					sendThread = new Thread(sender);
 					sendThread.start();
+
+					(new Thread(sender)).start();
 					
 					operation = 2;
 				}
@@ -223,6 +226,8 @@ public class MazeGame extends Applet {
 				// Pending send
 				if(!sendThread.isAlive()) {
 					System.out.printf("Finished sending... Bringing to success page.\n");
+					InfoPackage pack = new InfoPackage();
+					String tTime = pack.getTime();
 					try {
 						getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
 					} catch (MalformedURLException ex) {
@@ -266,7 +271,7 @@ public class MazeGame extends Applet {
 						    double y2 = cirY+Math.cos((double)(i/4)*(3.14159/180))*20;
 						    GL11.glVertex2d(x2,y2);
 						}
-						 
+						
 						GL11.glEnd();
 					}
 				}
