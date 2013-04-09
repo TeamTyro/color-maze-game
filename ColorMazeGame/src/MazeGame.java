@@ -8,6 +8,8 @@
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 
 import org.lwjgl.LWJGLException;
@@ -200,6 +202,12 @@ public class MazeGame extends Applet {
 					eTime = sdf.format(endDate);
 					SendData sender = new SendData(packUp(sTime, eTime, recActions));
 					(new Thread(sender)).start();
+					
+					try {
+						getAppletContext().showDocument(new URL(getCodeBase()+"thanks.php?time=" + tTime ),"_top");
+					} catch (MalformedURLException ex) {
+						System.out.println(ex.getMessage());
+					}
 					
 					operation = 2;
 				}
