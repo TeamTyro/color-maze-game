@@ -45,6 +45,9 @@ public class MazeGame extends Applet {
 	boolean running;
 	Thread gameThread, sendThread;
 	
+	int cirTheta, cirRadius;
+	boolean cirInc;
+	
 	boolean showDiagonal = true;
 	
 	/** Function startLWJGL()
@@ -148,6 +151,10 @@ public class MazeGame extends Applet {
 		
 		currentAction = 0;
 		
+		cirTheta = 0;
+		cirRadius = 0;
+		cirInc = true;
+		
 		MazeMap maze = new MazeMap();
 		
 		maze.loadConstMap("cbbbccccccccbbbbcccccbbbbbbcbbbbcbbbcbsbccbcbbbbcccbccc" +
@@ -223,6 +230,45 @@ public class MazeGame extends Applet {
 					}
 					
 					operation = 4;
+				} else {
+					if(cirTheta >= 360) {
+						cirTheta = 0;
+					} else {
+						cirTheta++;
+					}
+					
+					if(cirRadius >= 300) {
+						cirInc = false;
+					} else if(cirRadius <= 0) {
+						cirInc = true;
+					}
+					if(cirInc) {
+						cirRadius++;
+					} else {
+						cirRadius--;
+					}
+					double cirX, cirY;
+					GL11.glColor3f(1,1,1);
+					for(int j=0; j<8; j++) {
+						double cTheta = cirTheta + (j*45);
+						if(cTheta > 360) {
+							cTheta = cTheta-360;
+						}
+						cirX = cirRadius * Math.sin(cTheta*(3.14159f/180));
+						cirY = cirRadius * Math.cos(cTheta*(3.14159f/180));
+						
+						GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+						GL11.glVertex2d(cirX,cirY);
+						 
+						for (int i=0; i<360*4; i++)
+						{
+						    double x2 = cirX+Math.sin((double)(i/4)*(3.14159/180))*20;
+						    double y2 = cirY+Math.cos((double)(i/4)*(3.14159/180))*20;
+						    GL11.glVertex2d(x2,y2);
+						}
+						 
+						GL11.glEnd();
+					}
 				}
 			} else if(operation == 3) {
 				// Wait for user to start testing
