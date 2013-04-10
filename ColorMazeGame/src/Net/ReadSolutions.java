@@ -18,7 +18,7 @@ public class ReadSolutions {
 	public static int solutionsCount;
 	public static MazeMap m = new MazeMap();
 	public static int[][] map;
-	public Random r = new Random(3);
+	public Random r = new Random(18);//3
 	public static String mapnumber;
 	public static int sX;				//The x start position of the player
 	public static int sY;				//The y start position of the player
