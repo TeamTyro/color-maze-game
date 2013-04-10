@@ -211,8 +211,6 @@ public class MazeGame extends Applet {
 					
 					sendThread = new Thread(sender);
 					sendThread.start();
-
-					(new Thread(sender)).start();
 					
 					operation = 2;
 				}
