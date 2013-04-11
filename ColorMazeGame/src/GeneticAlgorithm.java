@@ -1,5 +1,7 @@
 import java.util.Random;
 
+import etc.Constants;
+
 
 public class GeneticAlgorithm {
 
@@ -144,10 +146,10 @@ public class GeneticAlgorithm {
 	public static int opposite(int direction){	//returns the opposite direction. If not valid, returns -1.
 		
 		switch(direction){
-			case 0: return 1;
-			case 1:	return 0;
-			case 2:	return 3;
-			case 3:	return 2;
+			case Constants.DIR_UP: return Constants.DIR_DOWN;
+			case Constants.DIR_DOWN:	return Constants.DIR_UP;
+			case Constants.DIR_LEFT:	return Constants.DIR_RIGHT;
+			case Constants.DIR_RIGHT:	return Constants.DIR_LEFT;
 			
 		}
 		

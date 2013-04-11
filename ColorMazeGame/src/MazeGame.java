@@ -25,13 +25,13 @@ import etc.MazeMap;
 
 public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	//			Pre-Genetic Algorithm Code				//
-	private static Random generator = new Random(5);
+	private static Random generator = new Random();
 	private static int[][] map;							// Universal map array [x left = 0][y, top = 0] Returns a constant for what is in that particular space (MAP_BLOCK,ect.)	
 	private static int pX, pY;							// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
 	public static int runs = 				30000;		//total runs to train the AI
-	public static int frameSpeed = 			250;			//how many miliseconds per frame
+	public static int frameSpeed = 			50;			//how many miliseconds per frame
 	//public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 	3;			//What the max repeats on a block will be, before the AI quits out of the map and retrys.
 	public static float percentSolutions = 	.012f;		//What percent of the mapSolutions data points to teach the AI. 1 = 100%
@@ -95,11 +95,12 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		while(!Display.isCloseRequested()) {	
 			if(stuckInLoop()){						//If stuck, reset everything and try again.
 				System.out.println("Stuck");
-				deleteBadInput(findBadInput());
+				changeBadInput(findBadInput());
 				resetMap();																			//The following resets the map, and runs the AI- but with one less input. It unlearns the input that originally got it stuck.
 				ai = new NeuralNetwork(5,hiddenLayers, 2, inputSet,outputSet, runs, mapnumber);
 				lastOutput = Constants.DIR_UP;
 				finalSolution = "";
+				sleep(10000);
 				//break;
 			}
 			if(map[pX][pY] == Constants.MAP_WIN){	//If it has won game, break out of the while loop
@@ -112,14 +113,16 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 			render();
 			
 			setInputs();
-			finalSolution += checkKeys();		
+
+			finalSolution += checkKeys();
+
 			sleep(frameSpeed);
 			Display.update();
 		}
 
 	}
 	
-	private static void deleteBadInput(int badInput){
+	private static void deleteBadInput(int badInput){									//Simply deletes the current input
 		double[][] inputX = new double[inputSet.length-1][inputSet[0].length];			//Makes a copy inputsetArray that is one less large than the original inputSet array
 		double[][] outputX = new double[outputSet.length-1][outputSet[0].length];
 		boolean hasFoundBadInput = false;												//To keep order in the array, once it skips over the bad input it has to start copying into the cell of i-1,
@@ -146,6 +149,95 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		
 		inputSet = 	inputX;										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
 		outputSet = outputX;										//Creates new outputSet
+	}
+	
+	private static void changeBadInput(int badInput){									//Changes the bad input to another solution that will lead down the path
+		double[][] inputX = new double[inputSet.length][inputSet[0].length];			//Makes a copy inputsetArray that is one less large than the original inputSet array
+		double[][] outputX = new double[outputSet.length][outputSet[0].length];
+	
+		
+		for(int i = 0; i < inputSet.length-1; i++){										//Goes through input set, copying everything but the bad input into inputX
+
+			for(int j = 0; j < inputSet[0].length; j++){
+				
+				if(i == badInput){
+					inputX[i][j] = inputSet[i][j];
+					
+					//11 = u; 00 = d; 10 = l; 01 = r
+					if(j == inputSet[0].length){
+						while(true){
+							int rMove = randomMove();
+							if(movePlayer(rMove, pX, pY, map) &&){
+								if(rMove == Constants.DIR_RIGHT){
+									outputSet[i][0]= 0;		
+									outputSet[i][1]=1;
+									System.out.println("DIR_RIGHT");
+									break;
+								}
+								if(rMove == Constants.DIR_LEFT){
+									outputSet[i][0]= 1;		
+									outputSet[i][1]=0;
+									System.out.println("DIR_LEFT");
+									break;
+								}
+								if(rMove == Constants.DIR_UP){
+									outputSet[i][0]= 1;		
+									outputSet[i][1]=1;
+									System.out.println("DIR_Up");
+									break;
+								}
+								if(rMove == Constants.DIR_DOWN){
+									outputSet[i][0]= 0;		
+									outputSet[i][1]=0;
+									System.out.println("DIR_DOWN");
+									break;
+								}
+							}
+						}
+					}
+					
+				}
+				
+				
+				if(i != badInput){
+					inputX[i][j] = inputSet[i][j];
+					outputX[i][0] = outputSet[i][0];									
+					outputX[i][1] = outputSet[i][1];
+				}
+				
+				
+				
+			}
+
+		}
+		
+		inputSet = 	inputX;										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		outputSet = outputX;										//Creates new outputSet
+	}
+	
+	public static int opposite(int direction){	//returns the opposite direction. If not valid, returns -1.
+		
+		switch(direction){
+			case Constants.DIR_UP: return Constants.DIR_DOWN;
+			case Constants.DIR_DOWN:	return Constants.DIR_UP;
+			case Constants.DIR_LEFT:	return Constants.DIR_RIGHT;
+			case Constants.DIR_RIGHT:	return Constants.DIR_LEFT;
+			
+		}
+		
+		return -1;
+	}
+	
+	private static int randomMove(){
+		int move = -100;
+		while(move == -100){
+			int r = generator.nextInt(4);
+			if(r == 0){	System.out.println("Go down");	move = Constants.DIR_DOWN;}
+			if(r == 1){	System.out.println("Go left");	move = Constants.DIR_LEFT;}
+			if(r == 2){ System.out.println("Go right");	move = Constants.DIR_RIGHT;}
+			if(r == 3){	System.out.println("Go up"); 	move = Constants.DIR_UP;}
+		}
+		return move;
 	}
 	
 	private static int findBadInput(){
