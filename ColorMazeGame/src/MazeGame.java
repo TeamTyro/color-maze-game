@@ -30,12 +30,12 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	private static int pX, pY;							// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
-	public static int runs = 				30000;		//total runs to train the AI
-	public static int frameSpeed = 			50;			//how many miliseconds per frame
+	public static int runs = 				2500;		//total runs to train the AI
+	public static int frameSpeed = 			250;			//how many miliseconds per frame
 	//public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 	3;			//What the max repeats on a block will be, before the AI quits out of the map and retrys.
 	public static float percentSolutions = 	.012f;		//What percent of the mapSolutions data points to teach the AI. 1 = 100%
-	public static int hiddenLayers = 		12;			//How many hidden layers the ANN will have.
+	public static int hiddenLayers = 		10;			//How many hidden layers the ANN will have.
 	//			Non Changable Variables 				//
 	public static double[] inputs = new double[5];		//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
 	public static double[][] inputSet;					//Is filled in by ReadSolution. It holds all the data points (expanded) from the mapSolutions file.
@@ -70,15 +70,69 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		
 		while(!Display.isCloseRequested()) {	// Start main loop
 
+			String solution = findSolution();
+			System.out.println(solution);
+			
+			
+			
+			int counter = 0;					//For replaying purposes.
 			resetMap();
-			findSolution();
+			while(counter < solution.length()){
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer	
+				render();
+				
+				replayGame(solution,counter);
+				sleep(frameSpeed);
+				
+				Display.update();
+				counter += 1;
+			}
+			sleep(1000);
 		}			
 		//end of while loop, when display closes.
 		Display.destroy();
 	}
 	
-	private static void findSolution(){
+	private static String findSolution(){
 		
+		resetFindSolution();
+		int counter = 0;							//If it gets stuck more than 25 times, it quits out and starts anew.
+		while(!Display.isCloseRequested()) {	
+			if(counter == 10 ){
+				resetFindSolution();
+				counter = 0;
+				System.out.println("Stuck");
+			}
+			if(stuckInLoop()){						//If stuck, reset everything and try again.
+				counter += 1;
+				//setInputs();
+				changeBadInput(findBadInput());
+				resetMap();																			//The following resets the map, and runs the AI- but with one less input. It unlearns the input that originally got it stuck.
+				//resetMapCount();
+				ai = new NeuralNetwork(5,hiddenLayers, 2, inputSet,outputSet, runs, mapnumber);
+				lastOutput = Constants.DIR_UP;
+				finalSolution = "";
+				//break;
+			}
+			if(map[pX][pY] == Constants.MAP_WIN){	//If it has won game, break out of the while loop
+				return finalSolution;
+			}
+			//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer	
+			//render();
+			
+			setInputs();
+
+			finalSolution += checkKeys();
+
+			//sleep(frameSpeed);
+			//Display.update();
+			
+		}
+		return "Serious Error :P";
+	}
+	
+	private static void resetFindSolution(){
+		resetMap();
 		r = new ReadSolutions(mapnumber);
 		inputSet = 	r.getInputs(percentSolutions);										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
 		outputSet = new double[inputSet.length][2];										//Creates new outputSet
@@ -92,34 +146,6 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		
 		lastOutput = Constants.DIR_UP;
 		finalSolution = "";
-		while(!Display.isCloseRequested()) {	
-			if(stuckInLoop()){						//If stuck, reset everything and try again.
-				System.out.println("Stuck");
-				changeBadInput(findBadInput());
-				resetMap();																			//The following resets the map, and runs the AI- but with one less input. It unlearns the input that originally got it stuck.
-				ai = new NeuralNetwork(5,hiddenLayers, 2, inputSet,outputSet, runs, mapnumber);
-				lastOutput = Constants.DIR_UP;
-				finalSolution = "";
-				sleep(10000);
-				//break;
-			}
-			if(map[pX][pY] == Constants.MAP_WIN){	//If it has won game, break out of the while loop
-				System.out.println(finalSolution);
-				System.out.println("Solved");
-				sleep(1500);
-				break;
-			}
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);	// Clears screen and depth buffer	
-			render();
-			
-			setInputs();
-
-			finalSolution += checkKeys();
-
-			sleep(frameSpeed);
-			Display.update();
-		}
-
 	}
 	
 	private static void deleteBadInput(int badInput){									//Simply deletes the current input
@@ -156,7 +182,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		double[][] outputX = new double[outputSet.length][outputSet[0].length];
 	
 		
-		for(int i = 0; i < inputSet.length-1; i++){										//Goes through input set, copying everything but the bad input into inputX
+		for(int i = 0; i < inputSet.length; i++){										//Goes through input set, copying everything but the bad input into inputX
 
 			for(int j = 0; j < inputSet[0].length; j++){
 				
@@ -164,37 +190,6 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 					inputX[i][j] = inputSet[i][j];
 					
 					//11 = u; 00 = d; 10 = l; 01 = r
-					if(j == inputSet[0].length){
-						while(true){
-							int rMove = randomMove();
-							if(movePlayer(rMove, pX, pY, map) &&){
-								if(rMove == Constants.DIR_RIGHT){
-									outputSet[i][0]= 0;		
-									outputSet[i][1]=1;
-									System.out.println("DIR_RIGHT");
-									break;
-								}
-								if(rMove == Constants.DIR_LEFT){
-									outputSet[i][0]= 1;		
-									outputSet[i][1]=0;
-									System.out.println("DIR_LEFT");
-									break;
-								}
-								if(rMove == Constants.DIR_UP){
-									outputSet[i][0]= 1;		
-									outputSet[i][1]=1;
-									System.out.println("DIR_Up");
-									break;
-								}
-								if(rMove == Constants.DIR_DOWN){
-									outputSet[i][0]= 0;		
-									outputSet[i][1]=0;
-									System.out.println("DIR_DOWN");
-									break;
-								}
-							}
-						}
-					}
 					
 				}
 				
@@ -208,6 +203,37 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 				
 				
 			}
+			if(i == badInput){										//Sets the new input for the outputX
+				while(true){
+					int rMove = randomMove();
+					if(movePlayer(rMove, pX, pY, map)){
+						if(rMove == Constants.DIR_RIGHT){
+							outputX[i][0]= Constants.negative;		
+							outputX[i][1]=Constants.positive;
+							//System.out.println("DIR_RIGHT");
+							break;
+						}
+						if(rMove == Constants.DIR_LEFT){
+							outputX[i][0]= Constants.positive;		
+							outputX[i][1]=Constants.negative;
+							//System.out.println("DIR_LEFT");
+							break;
+						}
+						if(rMove == Constants.DIR_UP){
+							outputX[i][0]= Constants.positive;		
+							outputX[i][1]=Constants.positive;
+							//System.out.println("DIR_UP");
+							break;
+						}
+						if(rMove == Constants.DIR_DOWN){
+							outputX[i][0]= Constants.negative;		
+							outputX[i][1]=Constants.negative;
+							//System.out.println("DIR_DOWN");
+							break;
+						}
+					}
+				}
+			}
 
 		}
 		
@@ -218,7 +244,7 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	public static int opposite(int direction){	//returns the opposite direction. If not valid, returns -1.
 		
 		switch(direction){
-			case Constants.DIR_UP: return Constants.DIR_DOWN;
+			case Constants.DIR_UP: 		return Constants.DIR_DOWN;
 			case Constants.DIR_DOWN:	return Constants.DIR_UP;
 			case Constants.DIR_LEFT:	return Constants.DIR_RIGHT;
 			case Constants.DIR_RIGHT:	return Constants.DIR_LEFT;
@@ -232,10 +258,10 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		int move = -100;
 		while(move == -100){
 			int r = generator.nextInt(4);
-			if(r == 0){	System.out.println("Go down");	move = Constants.DIR_DOWN;}
-			if(r == 1){	System.out.println("Go left");	move = Constants.DIR_LEFT;}
-			if(r == 2){ System.out.println("Go right");	move = Constants.DIR_RIGHT;}
-			if(r == 3){	System.out.println("Go up"); 	move = Constants.DIR_UP;}
+			if(r == 0){		move = Constants.DIR_DOWN;}
+			if(r == 1){		move = Constants.DIR_LEFT;}
+			if(r == 2){ 	move = Constants.DIR_RIGHT;}
+			if(r == 3){		move = Constants.DIR_UP;}
 		}
 		return move;
 	}

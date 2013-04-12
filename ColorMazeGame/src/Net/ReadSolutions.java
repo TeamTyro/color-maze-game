@@ -18,7 +18,7 @@ public class ReadSolutions {
 	public static int solutionsCount;
 	public static MazeMap m = new MazeMap();
 	public static int[][] map;
-	public Random r = new Random(5);//3
+	public Random r = new Random();//3
 	public static String mapnumber;
 	public static int sX;				//The x start position of the player
 	public static int sY;				//The y start position of the player
@@ -28,7 +28,7 @@ public class ReadSolutions {
 		mapnumber = mapx;											//the name of the map file.
 		map = new int[Constants.MAP_WIDTH][Constants.MAP_HEIGHT];
 		getmapArray();
-		System.out.println("////SOLUTION READER////");
+		//System.out.println("////SOLUTION READER////");
 		solutions = readSolutions();	//Sets the solutions array to all of the data in the text file. solutions[solution#] = String of solution
 		
 	}
@@ -45,7 +45,7 @@ public class ReadSolutions {
 				solutionsCount += 1;
 			}
 			in.close();
-			System.out.println("	Total Moves: "+totalMoves+"	Total Solutions: "+solutionsCount);	
+			//System.out.println("	Total Moves: "+totalMoves+"	Total Solutions: "+solutionsCount);	
 		} catch(IOException ex) {
 			System.out.printf("ERROR: Couldn't load map\n");
 		}
@@ -68,7 +68,7 @@ public class ReadSolutions {
 /*		for(int s = 0; s < solutions; s++){					//For testing, print out each solution in the solution array.
 			System.out.println(textSolutions[s]);
 		}*/
-		System.out.println("///////////////////////"+"\n");	//The \n will skip to a line.
+		//System.out.println("///////////////////////"+"\n");	//The \n will skip to a line.
 		return textSolutions;
 	}
 
@@ -77,7 +77,7 @@ public class ReadSolutions {
 		double inputs[][] = new double[solutionsToRecord][5];							//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
 		outputs = new double[solutionsToRecord][2];
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
-		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
+		//System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
 		
 		for(int i =0; i< inputs.length; i++){
 			for(int j=0; j < inputs[i].length; j++){
@@ -122,7 +122,7 @@ public class ReadSolutions {
 			}
 			
 		}
-		System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
+		//System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
 		
 		return inputs;
 	}
@@ -217,7 +217,7 @@ public class ReadSolutions {
 				if(map[x][y] == Constants.MAP_START) {
 					sX = x;
 					sY = y;
-					System.out.println("Player X: "+sX+"	Player Y: "+sY);
+					//System.out.println("Player X: "+sX+"	Player Y: "+sY);
 				}
 			}
 		}	

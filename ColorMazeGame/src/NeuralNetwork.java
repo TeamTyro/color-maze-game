@@ -19,7 +19,7 @@ public class NeuralNetwork {
 
 	final boolean isTrained = false;
 	final DecimalFormat df;
-	final Random rand = new Random(5);
+	final Random rand = new Random();
 	final ArrayList<Neuron> inputLayer = new ArrayList<Neuron>();
 	final ArrayList<Neuron> hiddenLayer = new ArrayList<Neuron>();
 	final ArrayList<Neuron> outputLayer = new ArrayList<Neuron>();
@@ -29,7 +29,7 @@ public class NeuralNetwork {
 
 	final double epsilon = 0.00000000001;
 
-	final double learningRate = 0.89f;
+	final double learningRate = 0.999f;
 	final double momentum = 0.97f;
 	// Inputs for xor problem
 	public double[][] inputs;					//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
@@ -105,7 +105,7 @@ public class NeuralNetwork {
 			updateAllWeights();
 		}
 		
-		double minErrorCondition = 0.1;
+		double minErrorCondition = 0.2;
 		run(maxRuns, minErrorCondition);
 	}
 
@@ -130,16 +130,16 @@ public class NeuralNetwork {
 			}
 		}
 
-		printResult();
+		//printResult();
 		
-		System.out.println("Sum of squared errors = " + error);
-		System.out.println("##### EPOCH " + i+"\n");
+		//System.out.println("Sum of squared errors = " + error);
+		//System.out.println("##### EPOCH " + i+"\n");
 		if (i == maxSteps) {
-			System.out.println("!Error training try again, maxed steps");
+			//System.out.println("!Error training try again, maxed steps");
 		} else {
 			//printAllWeights();
 			//printWeightUpdate();
-			System.out.println("TotalRuns: "+i);
+			//System.out.println("TotalRuns: "+i);
 		}
 	
 	}
@@ -152,9 +152,9 @@ public class NeuralNetwork {
 
 		output = getOutput();							//returns output[], an array holding the output of each neuron.	
 
-		for(int i = 0; i < output.length; i++){
-			System.out.println((double) output[i]);
-		}
+		//for(int i = 0; i < output.length; i++){
+		//	System.out.println((double) output[i]);
+		//}
 		
 		double half = (double) (Constants.positive+Constants.negative)/2;
 		
@@ -162,7 +162,7 @@ public class NeuralNetwork {
 		if(output[0] > half && output[1] > half){ o = Constants.DIR_UP;		}
 		if(output[0] > half && output[1] < half){ o = Constants.DIR_LEFT;	}
 		if(output[0] < half && output[1] > half){ o = Constants.DIR_RIGHT;	}
-		System.out.println(o);
+		//System.out.println(o);
 		return o;
 	}
 	
