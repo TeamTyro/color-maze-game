@@ -146,7 +146,7 @@ public class MazeGame extends Applet {
 		pY = 0;
 		keyRefresh = new boolean [6];
 		
-		recActions = new int [500];
+		recActions = new int [50000];
 		operation = 3;
 		
 		currentAction = 0;
