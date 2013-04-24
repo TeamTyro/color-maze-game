@@ -33,7 +33,7 @@ public class MazeGame {
 	//			Variables that you can change			//
 	public static int runs = 				50;			//total runs
 	//public static int generations = 		10;			//total generations
-	public static int frameSpeed = 			1;			//how many miliseconds per frame
+	public static int frameSpeed = 			0;			//how many miliseconds per frame
 	public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock =	10;			//the max amount of time an AI is allowed to repeat on a block, before it quits out.
 	
