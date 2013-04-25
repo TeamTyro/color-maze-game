@@ -43,7 +43,7 @@ public class NeuralNetwork {
 	ReadSolutions r;
 
 	public NeuralNetwork(int input, int hidden, int output,double[][] inputSet,double[][] outputSet, int maxRuns, String map) {
-		
+
 		inputs = inputSet;
 		expectedOutputs = outputSet;
 		resultOutputs = new double[inputs.length][2];

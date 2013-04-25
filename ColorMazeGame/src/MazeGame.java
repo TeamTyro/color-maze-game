@@ -30,11 +30,11 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	private static int pX, pY;							// Player x and y (within the map array)
 	public static int moveCount = 0;
 	//			Variables that you can change			//
-	public static int runs = 				2500;		//total runs to train the AI
-	public static int frameSpeed = 			250;			//how many miliseconds per frame
+	public static int runs = 				1500;		//total runs to train the AI
+	public static int frameSpeed = 			0;			//how many miliseconds per frame
 	//public static int maxSolutionSize = 	500;		//how long we will allow solutions to be.
 	public static int maxRepeatsonBlock = 	3;			//What the max repeats on a block will be, before the AI quits out of the map and retrys.
-	public static float percentSolutions = 	.012f;		//What percent of the mapSolutions data points to teach the AI. 1 = 100%
+	public static int solutionsToRecord= 	30;		//What percent of the mapSolutions data points to teach the AI. 1 = 100%
 	public static int hiddenLayers = 		10;			//How many hidden layers the ANN will have.
 	//			Non Changable Variables 				//
 	public static double[] inputs = new double[5];		//how many inputs there are. (shows the blocks in the directions up, down, left, right. to the player NOT IN THAT ORDER)
@@ -71,9 +71,10 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 		while(!Display.isCloseRequested()) {	// Start main loop
 
 			String solution = findSolution();
+			
 			System.out.println(solution);
 			
-			
+		
 			
 			int counter = 0;					//For replaying purposes.
 			resetMap();
@@ -96,12 +97,13 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	private static String findSolution(){
 		
 		resetFindSolution();
+		
 		int counter = 0;							//If it gets stuck more than 25 times, it quits out and starts anew.
 		while(!Display.isCloseRequested()) {	
-			if(counter == 10 ){
+			if(counter == 20 ){
 				resetFindSolution();
 				counter = 0;
-				System.out.println("Stuck");
+				//System.out.println("Stuck");
 			}
 			if(stuckInLoop()){						//If stuck, reset everything and try again.
 				counter += 1;
@@ -133,8 +135,11 @@ public class MazeGame {	//0=UP;	1=DOWN;	2=LEFT;	3=RIGHT
 	
 	private static void resetFindSolution(){
 		resetMap();
+		
 		r = new ReadSolutions(mapnumber);
-		inputSet = 	r.getInputs(percentSolutions);										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		
+		inputSet = 	r.getInputs(solutionsToRecord);										//Finds random inputs, a percent amount of total data. It then sets the output array, to be pulled in getOutputs()
+		//System.out.println("TOTALMOVES: "+inputSet.length);
 		outputSet = new double[inputSet.length][2];										//Creates new outputSet
 		for(int i = 0; i < outputSet.length; i++){										//Clears outputSet
 			for(int j = 0; j < outputSet[i].length; j++){

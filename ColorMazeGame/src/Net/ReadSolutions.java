@@ -72,11 +72,12 @@ public class ReadSolutions {
 		return textSolutions;
 	}
 
-	public double[][] getInputs(float percent){											//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
-		int solutionsToRecord = ((int) (percent*totalMoves));
+	public double[][] getInputs(int solutionsToRecord){											//inputs[][] = {	{bUp, bDown, bLeft, bRight, lMov }, {bUp, bDown, bLeft, bRight, lMov }	} an example of an array with two input sets
 		double inputs[][] = new double[solutionsToRecord][5];							//Makes an array of the appropriate size. (the percent amount of total moves, in int format)
 		outputs = new double[solutionsToRecord][2];
 		int solutionsRecorded = 0;														//Since the ANN must be fed truly random info, it will just randomly set info until the array is full. This keeps track of how much info has, indeed, been recorded so far.
+		double percent = ((double) solutionsToRecord)/((double) totalMoves);
+		//System.out.println(solutionsToRecord+" "+percent);
 		//System.out.println("	Inputs to learn: "+inputs.length);						//This prints the amount of input sets that will be fed into the ANN.
 		
 		for(int i =0; i< inputs.length; i++){
@@ -149,7 +150,7 @@ public class ReadSolutions {
 			situation[1] = map[pX][pY+1];	//below you
 		}else{ situation[1] = Constants.MAP_BLOCK;	}	
 		
-		if(pY - 1 > 0){						//If you're not at the top of the map.
+		if(pY - 1 >= 0){						//If you're not at the top of the map.
 			situation[0] = map[pX][pY-1];	//above you
 			if(situation[0] == Constants.MAP_START){ situation[0] = Constants.MAP_SPACE; }
 		}else{	situation[0] = Constants.MAP_BLOCK;}	
@@ -158,7 +159,7 @@ public class ReadSolutions {
 			situation[3] = map[pX+1][pY];	//right of you
 		}else{	situation[3] = Constants.MAP_BLOCK;}	
 		
-		if(pX - 1 > 0){						//If you're not at the left edge of the map.	
+		if(pX - 1 >= 0){						//If you're not at the left edge of the map.	
 			situation[2] = map[pX-1][pY];	//left of you
 			//if(situation[2] == Constants.MAP_WIN){ situation[2] = Constants.MAP_SPACE; }
 		}else{	situation[2] = Constants.MAP_BLOCK;}	
